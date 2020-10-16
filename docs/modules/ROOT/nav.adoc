@@ -1,0 +1,16 @@
+// INDEX
+* xref:index.adoc[Indexing Service]
+
+// FEATURES
+* xref:index.adoc#features[Features]
+
+* xref:index.adoc#indices[Indices]
+** xref:index.adoc#indices_special_field_types[Special Field Types]
+
+// EVENTS
+* xref:index.adoc#events[Events]
+** xref:index.adoc#events_command_interface[Command Interface]
+*** xref:index.adoc#events_command_interface_restore[Restore]
+*** xref:index.adoc#events_command_interface_reset[Reset]
+
+* xref:index.adoc#usage[Usage]

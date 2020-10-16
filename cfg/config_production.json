@@ -1,0 +1,96 @@
+{
+  "logger": {
+    "elasticsearch": {
+      "level": "info",
+      "clientOpts": {
+        "node": "http://elasticsearch:9200"
+      },
+      "source": "indexing-srv"
+    }
+  },
+  "redis": {
+    "host": "redis"
+  },
+  "elasticsearch": {
+    "client": {
+      "node": "http://elasticsearch:9200"
+    }
+  },
+  "events": {
+    "kafka": {
+      "kafkaHost": "kafka:9092"
+    }
+  },
+  "client": {
+    "services": {
+      "acs-srv": {
+        "publisher": {
+          "name": "static",
+          "instances": [
+            "grpc://access-control-srv:50051"
+          ]
+        }
+      },
+      "graph-srv": {
+        "publisher": {
+          "name": "static",
+          "instances": [
+            "grpc://resource-srv:50051"
+          ]
+        }
+      },
+      "role": {
+        "publisher": {
+          "name": "static",
+          "instances": [
+            "grpc://identity-srv:50051"
+          ]
+        }
+      },
+      "device_type": {
+        "publisher": {
+          "name": "static",
+          "instances": [
+            "grpc://device-srv:50051"
+          ]
+        }
+      },
+      "device_make": {
+        "publisher": {
+          "name": "static",
+          "instances": [
+            "grpc://device-srv:50051"
+          ]
+        }
+      }
+    },
+    "default-resource-srv": {
+      "publisher": {
+        "name": "static",
+        "instances": [
+          "grpc://resource-srv:50051"
+        ]
+      }
+    }
+  },
+  "server": {
+    "transports": [
+      {
+        "name": "indexingGRPC",
+        "provider": "grpc",
+        "services": {
+          "io-restorecommerce-indexing-cis": "io.restorecommerce.commandinterface.Service",
+          "io-restorecommerce-indexing-srv": "io.restorecommerce.search.Service",
+          "grpc-health-v1": "grpc.health.v1.Health"
+        },
+        "protos": [
+          "io/restorecommerce/commandinterface.proto",
+          "io/restorecommerce/search.proto",
+          "grpc/health/v1/health.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "addr": "0.0.0.0:50051"
+      }
+    ]
+  }
+}

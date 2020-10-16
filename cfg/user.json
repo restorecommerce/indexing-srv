@@ -1,0 +1,78 @@
+{
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text",
+        "analyzer": "user_analyzer"
+      },
+      "first_name": {
+        "type": "text",
+        "analyzer": "user_analyzer"
+      },
+      "last_name": {
+        "type": "text",
+        "analyzer": "user_analyzer"
+      },
+      "email": {
+        "type": "text",
+        "analyzer": "user_analyzer"
+      },
+      "role_associations": {
+        "type": "nested",
+        "properties": {
+          "role": {
+            "type": "nested",
+            "properties": {
+              "name": {
+                "type": "text",
+                "copy_to": "full_role",
+                "analyzer": "user_analyzer"
+              },
+              "description": {
+                "type": "text",
+                "copy_to": "full_role",
+                "analyzer": "user_analyzer"
+              }
+            }
+          },
+          "attributes": {
+            "type": "nested",
+            "properties": {
+              "id": {
+                "type": "keyword",
+                "index": false
+              },
+              "value": {
+                "type": "keyword",
+                "index": false
+              }
+            }
+          }
+        }
+      },
+      "full_role": {
+        "type": "text",
+        "analyzer": "user_analyzer"
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "user_analyzer": {
+          "filter": [
+            "lowercase"
+          ],
+          "tokenizer": "user_tokenizer"
+        }
+      },
+      "tokenizer": {
+        "user_tokenizer": {
+          "type": "ngram",
+          "min_gram": 4,
+          "max_gram": 4
+        }
+      }
+    }
+  }
+}

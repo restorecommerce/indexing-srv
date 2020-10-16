@@ -1,0 +1,129 @@
+{
+  "mappings": {
+    "properties": {
+      "website": {
+        "type": "text",
+        "analyzer": "contact_point_analyzer"
+      },
+      "email": {
+        "type": "text",
+        "analyzer": "contact_point_analyzer"
+      },
+      "address": {
+        "type": "nested",
+        "properties": {
+          "postcode": {
+            "type": "text",
+            "copy_to": "full_address",
+            "analyzer": "contact_point_analyzer"
+          },
+          "country": {
+            "type": "nested",
+            "properties": {
+              "name": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "contact_point_analyzer"
+              },
+              "country_code": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "contact_point_analyzer"
+              },
+              "geographical_name": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "contact_point_analyzer"
+              },
+              "economic_areas": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "contact_point_analyzer"
+              }
+            }
+          },
+          "locality": {
+            "type": "text",
+            "copy_to": "full_address",
+            "analyzer": "contact_point_analyzer"
+          },
+          "street": {
+            "type": "text",
+            "copy_to": "full_address",
+            "analyzer": "contact_point_analyzer"
+          },
+          "region": {
+            "type": "text",
+            "copy_to": "full_address",
+            "analyzer": "contact_point_analyzer"
+          },
+          "geo_coordinates": {
+            "type": "nested",
+            "properties": {
+              "latitude": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "contact_point_analyzer"
+              },
+              "longitude": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "contact_point_analyzer"
+              }
+            }
+          },
+          "altitude": {
+            "type": "text",
+            "copy_to": "full_address",
+            "analyzer": "contact_point_analyzer"
+          },
+          "building_number": {
+            "type": "text",
+            "analyzer": "contact_point_analyzer"
+          },
+          "address_addition": {
+            "type": "nested",
+            "properties": {
+              "field1": {
+                "type": "text",
+                "analyzer": "contact_point_analyzer"
+              },
+              "field2": {
+                "type": "text",
+                "analyzer": "contact_point_analyzer"
+              }
+            }
+          }
+        }
+      },
+      "full_address": {
+        "type": "text",
+        "analyzer": "contact_point_analyzer"
+      },
+      "telephone": {
+        "type": "text",
+        "copy_to": "full_address",
+        "analyzer": "contact_point_analyzer"
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "contact_point_analyzer": {
+          "filter": [
+            "lowercase"
+          ],
+          "tokenizer": "contact_point_tokenizer"
+        }
+      },
+      "tokenizer": {
+        "contact_point_tokenizer": {
+          "type": "ngram",
+          "min_gram": 4,
+          "max_gram": 4
+        }
+      }
+    }
+  }
+}

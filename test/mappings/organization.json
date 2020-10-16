@@ -1,0 +1,215 @@
+{
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text",
+        "analyzer": "org_analyzer"
+      },
+      "email": {
+        "type": "text",
+        "analyzer": "org_analyzer"
+      },
+      "website": {
+        "type": "text",
+        "analyzer": "org_analyzer"
+      },
+      "isic_v4": {
+        "type": "text",
+        "analyzer": "org_analyzer"
+      },
+      "registration": {
+        "type": "text",
+        "analyzer": "org_analyzer"
+      },
+      "registration_court": {
+        "type": "text",
+        "analyzer": "org_analyzer"
+      },
+      "vat_id": {
+        "type": "text",
+        "analyzer": "org_analyzer"
+      },
+      "address": {
+        "type": "nested",
+        "properties": {
+          "country": {
+            "type": "nested",
+            "properties": {
+              "name": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "org_analyzer"
+              },
+              "country_code": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "org_analyzer"
+              },
+              "geographical_name": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "org_analyzer"
+              },
+              "economic_areas": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "org_analyzer"
+              }
+            }
+          },
+          "postcode": {
+            "type": "text",
+            "copy_to": "full_address",
+            "analyzer": "org_analyzer"
+          },
+          "locality": {
+            "type": "text",
+            "copy_to": "full_address",
+            "analyzer": "org_analyzer"
+          },
+          "street": {
+            "type": "text",
+            "copy_to": "full_address",
+            "analyzer": "org_analyzer"
+          },
+          "region": {
+            "type": "text",
+            "copy_to": "full_address",
+            "analyzer": "org_analyzer"
+          },
+          "geo_coordinates": {
+            "type": "nested",
+            "properties": {
+              "latitude": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "org_analyzer"
+              },
+              "longitude": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "org_analyzer"
+              }
+            }
+          },
+          "altitude": {
+            "type": "text",
+            "copy_to": "full_address",
+            "analyzer": "org_analyzer"
+          }
+        }
+      },
+      "full_address": {
+        "type": "text",
+        "analyzer": "org_analyzer"
+      },
+      "contact_point": {
+        "type": "nested",
+        "properties": {
+          "website": {
+            "type": "text",
+            "analyzer": "org_analyzer"
+          },
+          "email": {
+            "type": "text",
+            "analyzer": "org_analyzer"
+          },
+          "address": {
+            "type": "nested",
+            "properties": {
+              "postcode": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "org_analyzer"
+              },
+              "country": {
+                "type": "nested",
+                "properties": {
+                  "name": {
+                    "type": "text",
+                    "copy_to": "full_address",
+                    "analyzer": "org_analyzer"
+                  },
+                  "country_code": {
+                    "type": "text",
+                    "copy_to": "full_address",
+                    "analyzer": "org_analyzer"
+                  },
+                  "geographical_name": {
+                    "type": "text",
+                    "copy_to": "full_address",
+                    "analyzer": "org_analyzer"
+                  },
+                  "economic_areas": {
+                    "type": "text",
+                    "copy_to": "full_address",
+                    "analyzer": "org_analyzer"
+                  }
+                }
+              },
+              "locality": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "org_analyzer"
+              },
+              "street": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "org_analyzer"
+              },
+              "region": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "org_analyzer"
+              },
+              "geo_coordinates": {
+                "type": "nested",
+                "properties": {
+                  "latitude": {
+                    "type": "text",
+                    "copy_to": "full_address",
+                    "analyzer": "org_analyzer"
+                  },
+                  "longitude": {
+                    "type": "text",
+                    "copy_to": "full_address",
+                    "analyzer": "org_analyzer"
+                  }
+                }
+              },
+              "altitude": {
+                "type": "text",
+                "copy_to": "full_address",
+                "analyzer": "org_analyzer"
+              }
+            }
+          },
+          "telephone": {
+            "type": "text",
+            "copy_to": "full_address",
+            "analyzer": "org_analyzer"
+          }
+        }
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "org_analyzer": {
+          "filter": [
+            "lowercase"
+          ],
+          "tokenizer": "org_tokenizer"
+        }
+      },
+      "tokenizer": {
+        "org_tokenizer": {
+          "type": "ngram",
+          "min_gram": 4,
+          "max_gram": 4
+        }
+      }
+    }
+  }
+}

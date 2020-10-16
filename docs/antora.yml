@@ -1,0 +1,5 @@
+name: indexing-srv
+title: Indexing Service
+version: master
+nav:
+  - modules/ROOT/nav.adoc

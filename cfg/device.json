@@ -1,0 +1,198 @@
+{
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text",
+        "analyzer": "device_analyzer"
+      },
+      "description": {
+        "type": "text",
+        "analyzer": "device_analyzer"
+      },
+      "lora": {
+        "type": "nested",
+        "properties": {
+          "eui": {
+            "type": "text",
+            "copy_to": "full_lora",
+            "analyzer": "device_analyzer"
+          },
+          "app_eui": {
+            "type": "text",
+            "copy_to": "full_lora",
+            "analyzer": "device_analyzer"
+          },
+          "app_key": {
+            "type": "text",
+            "copy_to": "full_lora",
+            "analyzer": "device_analyzer"
+          },
+          "device_address": {
+            "type": "text",
+            "copy_to": "full_lora",
+            "analyzer": "device_analyzer"
+          },
+          "network_session_key": {
+            "type": "text",
+            "copy_to": "full_lora",
+            "analyzer": "device_analyzer"
+          },
+          "app_session_key": {
+            "type": "text",
+            "copy_to": "full_lora",
+            "analyzer": "device_analyzer"
+          },
+          "network": {
+            "type": "text",
+            "copy_to": "full_lora",
+            "analyzer": "device_analyzer"
+          }
+        }
+      },
+      "full_lora": {
+        "type": "text",
+        "analyzer": "device_analyzer"
+      },
+      "organization": {
+        "type": "nested",
+        "properties": {
+          "name": {
+            "type": "text",
+            "copy_to": "full_org",
+            "analyzer": "device_analyzer"
+          },
+          "email": {
+            "type": "text",
+            "copy_to": "full_org",
+            "analyzer": "device_analyzer"
+          },
+          "website": {
+            "type": "text",
+            "copy_to": "full_org",
+            "analyzer": "device_analyzer"
+          },
+          "isic_v4": {
+            "type": "text",
+            "copy_to": "full_org",
+            "analyzer": "device_analyzer"
+          },
+          "registration": {
+            "type": "text",
+            "copy_to": "full_org",
+            "analyzer": "device_analyzer"
+          },
+          "registration_court": {
+            "type": "text",
+            "copy_to": "full_org",
+            "analyzer": "device_analyzer"
+          },
+          "vat_id": {
+            "type": "text",
+            "copy_to": "full_org",
+            "analyzer": "device_analyzer"
+          }
+        }
+      },
+      "full_org": {
+        "type": "text",
+        "analyzer": "device_analyzer"
+      },
+      "location": {
+        "type": "nested",
+        "properties": {
+          "name": {
+            "type": "text",
+            "copy_to": "full_loc",
+            "analyzer": "device_analyzer"
+          },
+          "description": {
+            "type": "text",
+            "copy_to": "full_loc",
+            "analyzer": "device_analyzer"
+          }
+        }
+      },
+      "full_loc": {
+        "type": "text",
+        "analyzer": "device_analyzer"
+      },
+      "device_type": {
+        "type": "nested",
+        "properties": {
+          "name": {
+            "type": "text",
+            "copy_to": "full_dev_type",
+            "analyzer": "device_analyzer"
+          },
+          "description": {
+            "type": "text",
+            "copy_to": "full_dev_type",
+            "analyzer": "device_analyzer"
+          },
+          "device_type": {
+            "type": "text",
+            "copy_to": "full_dev_type",
+            "analyzer": "device_analyzer"
+          },
+          "product_type": {
+            "type": "text",
+            "copy_to": "full_dev_type",
+            "analyzer": "device_analyzer"
+          },
+          "oem_id": {
+            "type": "text",
+            "copy_to": "full_dev_type",
+            "analyzer": "device_analyzer"
+          },
+          "variant": {
+            "type": "text",
+            "copy_to": "full_dev_type",
+            "analyzer": "device_analyzer"
+          }
+        }
+      },
+      "full_dev_type": {
+        "type": "text",
+        "analyzer": "device_analyzer"
+      },
+      "device_make": {
+        "type": "nested",
+        "properties": {
+          "name": {
+            "type": "text",
+            "copy_to": "full_dev_make",
+            "analyzer": "device_analyzer"
+          },
+          "description": {
+            "type": "text",
+            "copy_to": "full_dev_make",
+            "analyzer": "device_analyzer"
+          }
+        }
+      },
+      "full_dev_make": {
+        "type": "text",
+        "analyzer": "device_analyzer"
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "device_analyzer": {
+          "filter": [
+            "lowercase"
+          ],
+          "tokenizer": "device_tokenizer"
+        }
+      },
+      "tokenizer": {
+        "device_tokenizer": {
+          "type": "ngram",
+          "min_gram": 4,
+          "max_gram": 4
+        }
+      }
+    }
+  }
+}

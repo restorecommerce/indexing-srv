@@ -1,0 +1,85 @@
+= Indexing Service
+
+https://travis-ci.org/restorecommerce/indexing-srv?branch=master[image:https://img.shields.io/travis/restorecommerce/indexing-srv/master.svg?style=flat-square[Build Status]]
+https://david-dm.org/restorecommerce/indexing-srv[image:https://img.shields.io/david/restorecommerce/indexing-srv.svg?style=flat-square[Dependencies]]
+https://coveralls.io/github/restorecommerce/indexing-srv?branch=master[image:https://img.shields.io/coveralls/restorecommerce/indexing-srv/master.svg?style=flat-square[Coverage Status]]
+
+A microservice for indexing events.
+
+[#features]
+== Features
+
+* Consumes resources via Kafka topics, transforms the event messages and
+inserts the result into Elasticsearch.
+
+[#indices]
+== Indices
+
+The service creates a mapping on ElasticSearch for each index found via the `elasticsearch.indices` config value
+with a valid loadable mapping under the `mappings/` directory if the mapping is not already created.
+By default, it appends the fields `created` and `modified` as date fields in each resource mapping,
+since they are always set in every document in Restore Commerce services using the
+https://github.com/restorecommerce/resource-base-interface[`resource-base-interface`].
+
+[#indices_special_field_types]
+=== Special Field Types
+
+The service supports custom handling for some special field types:
+
+- `geo_points` fields get converted from
+`
+{
+&quot;longitude&quot;: 0,
+&quot;latitude&quot;: 0
+}
+`
+to
+`
+{
+&quot;lon&quot;: 0,
+&quot;lat&quot;: 0
+}
+`
+
+- `completion` fields get set to
+
+[source,json]
+----
+"<targetField>-suggest": {
+  "input": words(targetFieldValue),
+  "output": targetFieldValue,
+  "payload": {
+    "id": "this.id"
+  }
+}
+----
+
+[#events]
+== Events
+
+* The service consumes messages dispatched from CRUD operations from all topics within the format `&lt;prefix&gt;.&lt;resourceName&gt;s.resource`
+(e.g: `io.restorecommerce.users.resource`).
+* It also subscribes to system commands and emits command responses on topic `io.restorecommerce.command`.
+
+[#events_command_interface]
+=== Command Interface
+
+[#events_command_interface_restore]
+==== Restore
+
+The `command-interface's` restore method is overridden in this service in order to restore data related
+to one or more indices on ElasticSearch by reprocessing Kafka messages from a given starting offset.
+In order to prevent any overlap with a restore method of another service,
+the entities on the restore command's payload should be in the
+format `${entity}_index`.
+For example, `address_index` specifies the `address` index.
+
+[#events_command_interface_reset]
+==== Reset
+
+The reset command deletes all documents from all managed indices.
+
+[#usage]
+== Usage
+
+See tests.

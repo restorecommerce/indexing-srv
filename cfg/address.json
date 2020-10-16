@@ -1,0 +1,106 @@
+{
+  "mappings": {
+    "properties": {
+      "postcode": {
+        "type": "text",
+        "analyzer": "address_analyzer"
+      },
+      "country": {
+        "type": "nested",
+        "properties": {
+          "name": {
+            "type": "text",
+            "copy_to": "full_country",
+            "analyzer": "address_analyzer"
+          },
+          "country_code": {
+            "type": "text",
+            "copy_to": "full_country",
+            "analyzer": "address_analyzer"
+          },
+          "geographical_name": {
+            "type": "text",
+            "copy_to": "full_country",
+            "analyzer": "address_analyzer"
+          },
+          "economic_areas": {
+            "type": "text",
+            "copy_to": "full_country",
+            "analyzer": "address_analyzer"
+          }
+        }
+      },
+      "full_country": {
+        "type": "text",
+        "analyzer": "address_analyzer"
+      },
+      "locality": {
+        "type": "text",
+        "analyzer": "address_analyzer"
+      },
+      "street": {
+        "type": "text",
+        "analyzer": "address_analyzer"
+      },
+      "region": {
+        "type": "text",
+        "analyzer": "address_analyzer"
+      },
+      "geo_coordinates": {
+        "type": "nested",
+        "properties": {
+          "latitude": {
+            "type": "text",
+            "copy_to": "full_country",
+            "analyzer": "address_analyzer"
+          },
+          "longitude": {
+            "type": "text",
+            "copy_to": "full_country",
+            "analyzer": "address_analyzer"
+          }
+        }
+      },
+      "altitude": {
+        "type": "text",
+        "analyzer": "address_analyzer"
+      },
+      "building_number": {
+        "type": "text",
+        "analyzer": "address_analyzer"
+      },
+      "address_addition": {
+        "type": "nested",
+        "properties": {
+          "field1": {
+            "type": "text",
+            "analyzer": "address_analyzer"
+          },
+          "field2": {
+            "type": "text",
+            "analyzer": "address_analyzer"
+          }
+        }
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "address_analyzer": {
+          "filter": [
+            "lowercase"
+          ],
+          "tokenizer": "address_tokenizer"
+        }
+      },
+      "tokenizer": {
+        "address_tokenizer": {
+          "type": "ngram",
+          "min_gram": 4,
+          "max_gram": 4
+        }
+      }
+    }
+  }
+}

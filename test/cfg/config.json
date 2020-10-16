@@ -1,0 +1,274 @@
+{
+  "resources": {
+    "restorecommerce": {
+      "protoPathPrefix": "io/restorecommerce/",
+      "serviceNamePrefix": "io.restorecommerce.",
+      "protoRoot": "node_modules/@restorecommerce/protos/",
+      "resources": [
+        "organization"
+      ]
+    }
+  },
+  "logger": {
+    "console": {
+      "handleExceptions": false,
+      "level": "error",
+      "colorize": true,
+      "prettyPrint": true
+    }
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "offsetStoreInterval": 1000,
+    "db-indexes": {
+      "db-offsetStore": 0,
+      "db-subject": 4
+    }
+  },
+  "elasticsearch": {
+    "client": {
+      "node": "http://localhost:9200",
+      "apiVersion": "7.2",
+      "log": [
+        "info",
+        "error"
+      ]
+    },
+    "indices": [
+      "organization"
+    ]
+  },
+  "relations": {
+    "address": [
+      {
+        "field": "country_id",
+        "mappingProperty": "country",
+        "entity": "country"
+      }
+    ],
+    "organization": [
+      {
+        "field": "address_id",
+        "mappingProperty": "address",
+        "entity": "address"
+      },
+      {
+        "field": "contact_point_ids",
+        "mappingProperty": "contact_point",
+        "entity": "contact_point",
+        "relations": {
+          "address": [
+            {
+              "field": "physical_address_id",
+              "mappingProperty": "address",
+              "entity": "address"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "customIndex": {
+    "entity": "user",
+    "key": "role_associations"
+  },
+  "nestedArrayLongHandlers": {
+    "root": "contact_point",
+    "key": "phone_number"
+  },
+  "authorization": {
+    "urns": {
+      "entity": "urn:restorecommerce:acs:names:model:entity",
+      "model": "urn:restorecommerce:acs:model",
+      "role": "urn:restorecommerce:acs:names:role",
+      "roleScopingEntity": "urn:restorecommerce:acs:names:roleScopingEntity",
+      "ownerEntity": "urn:restorecommerce:acs:names:ownerIndicatoryEntity",
+      "ownerOrg": "urn:restorecommerce:acs:model:organization.Organization",
+      "ownerInstance": "urn:restorecommerce:acs:names:ownerInstance",
+      "unauthenticated_user": "urn:restorecommerce:acs:names:unauthenticated-user",
+      "property": "urn:restorecommerce:acs:names:model:property",
+      "resourceID": "urn:oasis:names:tc:xacml:1.0:resource:resource-id",
+      "actionID": "urn:oasis:names:tc:xacml:1.0:action:action-id",
+      "action": "urn:restorecommerce:acs:names:action",
+      "operation": "urn:restorecommerce:acs:names:operation"
+    },
+    "hierarchicalResources": [
+      {
+        "collection": "organizations",
+        "edge": "org_has_parent_org"
+      }
+    ]
+  },
+  "client": {
+    "services": {
+      "indexing-srv": {
+        "transports": {
+          "grpc": {
+            "service": "io.restorecommerce.search.Service",
+            "timeout": 3000,
+            "protos": [
+              "io/restorecommerce/search.proto"
+            ],
+            "protoRoot": "node_modules/@restorecommerce/protos/"
+          }
+        },
+        "loadbalancer": {
+          "name": "roundRobin"
+        },
+        "publisher": {
+          "name": "static",
+          "instances": [
+            "grpc://localhost:50064"
+          ]
+        },
+        "endpoints": {
+          "search": {}
+        }
+      }
+    }
+  },
+  "events": {
+    "kafka": {
+      "provider": "kafka",
+      "groupId": "indexing-srv",
+      "clientId": "indexing-srv",
+      "kafkaHost": "localhost:9092",
+      "latestOffset": true,
+      "healthCheckCommand": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
+      },
+      "healthCheckResponse": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
+      },
+      "versionCommand": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
+      },
+      "versionResponse": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
+      },
+      "restoreCommand": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
+      },
+      "restoreResponse": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
+      },
+      "resetCommand": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
+      },
+      "resetResponse": {
+        "protos": [
+          "io/restorecommerce/commandinterface.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
+      },
+      "topics": {
+        "command": {
+          "topic": "io.restorecommerce.command",
+          "events": [
+            "healthCheckCommand",
+            "versionCommand",
+            "restoreCommand",
+            "resetCommand"
+          ]
+        }
+      }
+    }
+  },
+  "server": {
+    "services": {
+      "io-restorecommerce-indexing-cis": {
+        "check": {
+          "transport": [
+            "indexingGRPC"
+          ]
+        },
+        "version": {
+          "transport": [
+            "indexingGRPC"
+          ]
+        },
+        "restore": {
+          "transport": [
+            "indexingGRPC"
+          ]
+        },
+        "reset": {
+          "transport": [
+            "indexingGRPC"
+          ]
+        }
+      },
+      "io-restorecommerce-indexing-srv": {
+        "search": {
+          "transport": [
+            "indexingGRPC"
+          ]
+        }
+      },
+      "grpc-health-v1": {
+        "check": {
+          "transport": [
+            "indexingGRPC"
+          ]
+        },
+        "watch": {
+          "transport": [
+            "indexingGRPC"
+          ]
+        }
+      }
+    },
+    "transports": [
+      {
+        "name": "indexingGRPC",
+        "provider": "grpc",
+        "services": {
+          "io-restorecommerce-indexing-cis": "io.restorecommerce.commandinterface.Service",
+          "io-restorecommerce-indexing-srv": "io.restorecommerce.search.Service",
+          "grpc-health-v1": "grpc.health.v1.Health"
+        },
+        "protos": [
+          "io/restorecommerce/commandinterface.proto",
+          "io/restorecommerce/search.proto",
+          "grpc/health/v1/health.proto"
+        ],
+        "protoRoot": "node_modules/@restorecommerce/protos/",
+        "addr": "localhost:50064"
+      }
+    ]
+  },
+  "serviceNames": {
+    "cis": "io-restorecommerce-indexing-cis",
+    "health":  "grpc-health-v1"
+  }
+}
