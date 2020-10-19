@@ -28,8 +28,10 @@
     "async": "^3.1.0",
     "bodybuilder": "^2.2.21",
     "jsonfile": "^6.0.1",
+    "kafka-node": "^5.0.0",
     "lodash": "^4.17.20",
     "long": "^4.0.0",
+    "redis": "^3.0.2",
     "traverse": "^0.6.6"
   },
   "devDependencies": {
@@ -61,11 +63,12 @@
     "build:tsc": "tsc -d",
     "coveralls": "cross-env NODE_ENV=test; nyc --reporter text --reporter lcov npm test",
     "createtopics": "node setupTopics.js io.restorecommerce.command",
+    "createtopics:test": "node setupTopics.js io.restorecommerce.command io.restorecommerce.organizations.resource",
     "dev": "cross-env NODE_ENV=development nodemon --watch './src/**/*.ts' --exec 'ts-node' src/start.ts",
     "lint": "eslint src --ext .ts",
     "mocha": "cross-env NODE_ENV=test mocha -R spec ./test/*.js --full-trace --exit",
-    "pretest": "eslint src/*.ts && npm run tsctests && npm run createtopics",
-    "start": "node lib/start.js",
+    "pretest": "npm run createtopics:test && npm run build && npm run tsctests",
+    "start": "npm run createtopics && node lib/start.js",
     "test": "npm run mocha",
     "test-debug": "mocha ./test/*.js --inspect-brk --exit",
     "tsctests": "tsc test/*.ts --module commonjs -target ES6"

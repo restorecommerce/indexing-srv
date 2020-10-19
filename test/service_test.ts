@@ -116,14 +116,15 @@ describe('Service tests', () => {
       doc.should.deepEqual(compareData);
     });
     it('should delete indexed messages', async function consumeEvents(): Promise<void> {
+      this.timeout(4000);
       await topic.emit('organizationDeleted', {
         id: data.id
       });
 
       await esClient.indices.refresh({ index: 'organization' });
 
-      // Sleep
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Sleep due to eventual consistency
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       const response = await esClient.search({
         index: 'organization',
