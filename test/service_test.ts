@@ -122,6 +122,9 @@ describe('Service tests', () => {
 
       await esClient.indices.refresh({ index: 'organization' });
 
+      // Sleep
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       const response = await esClient.search({
         index: 'organization',
         body: makeESQuery()
