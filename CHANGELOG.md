@@ -1,3 +1,7 @@
+# 0.0.13
+
+* Updated dependencies
+
 # 0.0.12
 
 * Updated dependencies
