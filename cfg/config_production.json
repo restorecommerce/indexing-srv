@@ -46,22 +46,6 @@
             "grpc://identity-srv:50051"
           ]
         }
-      },
-      "device_type": {
-        "publisher": {
-          "name": "static",
-          "instances": [
-            "grpc://device-srv:50051"
-          ]
-        }
-      },
-      "device_make": {
-        "publisher": {
-          "name": "static",
-          "instances": [
-            "grpc://device-srv:50051"
-          ]
-        }
       }
     },
     "default-resource-srv": {
