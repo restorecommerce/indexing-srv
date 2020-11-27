@@ -1,17 +1,13 @@
-import * as _ from 'lodash';
-
-import { Events, Topic } from '@restorecommerce/kafka-client';
+import {Events} from '@restorecommerce/kafka-client';
 import {
-  Server, config,
-  CommandInterface, OffsetStore,
-  Health
+  CommandInterface, config, Health, OffsetStore, Server
 } from '@restorecommerce/chassis-srv';
-import { Logger, createLogger } from '@restorecommerce/logger';
-
-import { IndexingService } from './service';
-import { IndexingCommandInterface } from './commandInterface';
-import { formatResourceType } from './utils';
-import { RedisClient, createClient } from 'redis';
+import {createLogger} from '@restorecommerce/logger';
+import {Logger} from 'winston';
+import {IndexingService} from './service';
+import {IndexingCommandInterface} from './commandInterface';
+import {formatResourceType} from './utils';
+import {createClient, RedisClient} from 'redis';
 
 export class Worker {
   cfg: any;
@@ -22,6 +18,7 @@ export class Worker {
   commandInterface: CommandInterface;
   offsetStore: OffsetStore;
   redisClient: RedisClient;
+
   async start(cfg?: any, logger?: Logger, mappingsDir?: string): Promise<void> {
     cfg = cfg || await config.get(logger);
     cfg = this.setUpResourcesConfig(cfg);
@@ -52,7 +49,7 @@ export class Worker {
       const offsetValue = await offsetStore.getOffset(topicName);
       for (let event of eventNames) {
         await topic.on(event, this.listener.bind(this),
-          { startingOffset: offsetValue });
+          {startingOffset: offsetValue});
       }
     }
 
@@ -61,7 +58,9 @@ export class Worker {
     this.redisClient = createClient(redisConfig);
 
     const server = new Server(cfg.get('server'), logger);
-    this.commandInterface = new IndexingCommandInterface(server, cfg, logger, events, indexer, this.redisClient);
+    this.commandInterface =
+      new IndexingCommandInterface(server, cfg, logger, events, indexer,
+        this.redisClient);
 
     await server.bind('io-restorecommerce-indexing-cis', this.commandInterface);
     await server.bind('io-restorecommerce-indexing-srv', indexer);
@@ -78,7 +77,8 @@ export class Worker {
     await this.events.stop();
   }
 
-  async listener(msg: any, context: any, config: any, eventName: string): Promise<void> {
+  async listener(msg: any, context: any, config: any,
+    eventName: string): Promise<void> {
     if (eventName.endsWith('Created')) {
       const resourceName = eventName.substr(0, eventName.indexOf('Created'));
       // Resource is indexed (same api is used for creating and updating)
@@ -99,7 +99,7 @@ export class Worker {
     const resourcesCfg = cfg.get('resources'); // list of index/resource names
 
     for (let resourceType in resourcesCfg) {
-      const { protoPathPrefix, serviceNamePrefix, protoRoot, resources } = resourcesCfg[resourceType];
+      const {protoPathPrefix, serviceNamePrefix, protoRoot, resources} = resourcesCfg[resourceType];
       for (let resourceName of resources) {
         const topicCfg = {
           topic: `${serviceNamePrefix}${resourceName}s.resource`,

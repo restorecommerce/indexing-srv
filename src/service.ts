@@ -3,13 +3,16 @@ import * as bodybuilder from 'bodybuilder';
 import * as elasticsearch from '@elastic/elasticsearch';
 import * as jsonfile from 'jsonfile';
 import * as traverse from 'traverse';
-
-import { errors, Logger } from '@restorecommerce/chassis-srv';
-import { ResourceProvider } from './resourceProvider';
-import { getSubTreeOrgs, createActionTarget, createResourceTarget } from './utils';
+import {errors} from '@restorecommerce/chassis-srv';
+import {ResourceProvider} from './resourceProvider';
+import {
+  createActionTarget, createResourceTarget, getSubTreeOrgs
+} from './utils';
 import * as Long from 'long';
+import {Logger} from 'winston';
 
-export class InvalidResourceError extends Error { }
+export class InvalidResourceError extends Error {
+}
 
 export class IndexingService {
   client: elasticsearch.Client;
@@ -21,6 +24,7 @@ export class IndexingService {
   resourceProvider: ResourceProvider;
   cfg: any;
   logger: Logger;
+
   constructor(cfg: any, logger: Logger, mappingsDir: string) {
     // this.cfg = cfg.get('elasticsearch');
     this.cfg = cfg;
@@ -56,9 +60,11 @@ export class IndexingService {
   async search(call: SearchCall, context: any): Promise<any> {
     const request = call.request;
     if (!this.mappings.has(request.collection)) {
-      throw new errors.Unimplemented(`Fulltext search is not configured for entity ${request.collection}`);
+      throw new errors.Unimplemented(
+        `Fulltext search is not configured for entity ${request.collection}`);
     }
-    const body = this.makeFulltextSearchBody(request.collection, request.text, request.acl);
+    const body = this.makeFulltextSearchBody(request.collection, request.text,
+      request.acl);
     let searchResponse: elasticsearch.ApiResponse;
     let result;
     try {
@@ -68,7 +74,7 @@ export class IndexingService {
       });
       result = searchResponse.body;
     } catch (err) {
-      this.logger.info('Error occured querying ES:', { error: err });
+      this.logger.info('Error occured querying ES:', {error: err});
       throw (err);
     }
     if (_.isEmpty(result.hits) || result.hits.total.value == 0) {
@@ -84,7 +90,8 @@ export class IndexingService {
 
         return {
           type_url: 'io.restorecommerce.search',
-          value: Buffer.from(JSON.stringify(Object.assign({ id: hit._id }, hit._source)))
+          value: Buffer.from(
+            JSON.stringify(Object.assign({id: hit._id}, hit._source)))
         };
       })
     };
@@ -95,7 +102,7 @@ export class IndexingService {
     const searchLimit = this.cfg.get('elasticsearch:searchLimit');
     if (acl && acl.length > 0) {
       return bodybuilder().size(searchLimit)
-        .query('nested', { path: 'meta' }, q => {
+        .query('nested', {path: 'meta'}, q => {
           for (let value of acl) {
             q = q.orQuery('term', 'meta.acl', value);
           }
@@ -132,7 +139,8 @@ export class IndexingService {
       },
     };
 
-    acsRequest.target.resources = createResourceTarget([resourceName], 'read', this.cfg);
+    acsRequest.target.resources =
+      createResourceTarget([resourceName], 'read', this.cfg);
     let policySet;
     try {
       const acsService = this.resourceProvider.resourceClients.get('acs-srv');
@@ -140,7 +148,9 @@ export class IndexingService {
         policySet = await acsService.whatIsAllowed(acsRequest);
       }
     } catch (err) {
-      this.logger.error(`Resource ${resourceName} could not be indexed due to error:`, { error: err.message });
+      this.logger.error(
+        `Resource ${resourceName} could not be indexed due to error:`,
+        {error: err.message});
       return;
     }
 
@@ -152,7 +162,7 @@ export class IndexingService {
       }
       if (!_.isEmpty(policySet.error)) {
         this.logger.error(`Resource ${resourceName} could not be indexed due to
-        error retreiving polices:`, { error: policySet.error });
+        error retreiving polices:`, {error: policySet.error});
         return;
       }
     }
@@ -166,7 +176,8 @@ export class IndexingService {
     let orgIds = new Set<String>();
     let urnsCfg = this.cfg.get('authorization:urns');
 
-    if (policySet && policySet.data && policySet.data.policy_sets && policySet.data.policy_sets[0]
+    if (policySet && policySet.data && policySet.data.policy_sets &&
+      policySet.data.policy_sets[0]
       && policySet.data.policy_sets[0].policies) {
       // Iterate through all the policies
       // Note: it is assumed that there is only one policy set
@@ -215,8 +226,10 @@ export class IndexingService {
     let completeOrgHierarchy = new Set<String>();
     for (let orgID of orgIds) {
       const orgList = await getSubTreeOrgs(orgID, 'outbound',
-        this.resourceProvider.resourceClients.get('graph-srv'), this.cfg, this.logger);
-      completeOrgHierarchy = new Set<String>([...completeOrgHierarchy, ...orgList]);
+        this.resourceProvider.resourceClients.get('graph-srv'), this.cfg,
+        this.logger);
+      completeOrgHierarchy =
+        new Set<String>([...completeOrgHierarchy, ...orgList]);
     }
 
     let aclList = [];
@@ -238,7 +251,8 @@ export class IndexingService {
       if (key === nestedLongHandler.root) {
         const longObj = body[key];
         if (Long.isLong(longObj[nestedLongHandler.key])) {
-          longObj[nestedLongHandler.key] = (longObj[nestedLongHandler.key] as Long).toNumber();
+          longObj[nestedLongHandler.key] =
+            (longObj[nestedLongHandler.key] as Long).toNumber();
         }
       }
       if (Long.isLong(body[key])) {
@@ -276,7 +290,9 @@ export class IndexingService {
     }
 
     if (result.result == 'created') {
-      this.logger.debug(`Document ${resourceData.id} from resource ${resourceName} was indexed`, result.result);
+      this.logger.debug(
+        `Document ${resourceData.id} from resource ${resourceName} was indexed`,
+        result.result);
     }
   }
 
@@ -293,7 +309,7 @@ export class IndexingService {
   async ensureMapping(index: string): Promise<void> {
     let exists = false;
     try {
-      const existsResponse = await this.client.indices.exists<boolean>({ index });
+      const existsResponse = await this.client.indices.exists<boolean>({index});
       exists = existsResponse.body;
     } catch (error) {
       if (error.status !== 404) {
@@ -348,16 +364,19 @@ export class IndexingService {
       }
     };
     const convertedMapping = this.convertMapping(index, mapping);
-    const searchableFields: string[] = _.reduce(convertedMapping.fields, (result: string[], value: any, key) => {
-      if (!(_.has(value, 'node.index') && _.get(value, 'node.index') === false)) {
-        result.push(value.path);
-      }
-      return result;
-    }, []);
+    const searchableFields: string[] = _.reduce(convertedMapping.fields,
+      (result: string[], value: any, key) => {
+        if (!(_.has(value, 'node.index') && _.get(value, 'node.index') ===
+          false)) {
+          result.push(value.path);
+        }
+        return result;
+      }, []);
     this.mappings.set(index, convertedMapping);
     this.searchableFields.set(index, searchableFields);
 
-    let nestedArrayHandlersCfg = this.cfg.get(`nestedArrayHandlers:${index}`) || [];
+    let nestedArrayHandlersCfg = this.cfg.get(`nestedArrayHandlers:${index}`) ||
+      [];
     // common config for all resources
     const nestedMetaCfg = {
       root: 'meta.owner',
@@ -379,7 +398,8 @@ export class IndexingService {
     }
 
     if (exists) {
-      this.logger.verbose(`Index ${index} already exists; skipping mapping updated`);
+      this.logger.verbose(
+        `Index ${index} already exists; skipping mapping updated`);
       return;
     }
 
@@ -401,7 +421,7 @@ export class IndexingService {
     return jsonfile.readFileSync(`${this.mappingsDir}/${index}.json`);
   }
 
-  convertMapping(index: string, mapping: any, ): MappingSettings {
+  convertMapping(index: string, mapping: any,): MappingSettings {
     return {
       geoPoints: this.getType(index, mapping, 'geo_point'),
       completions: this.getType(index, mapping, 'completion'),
@@ -417,33 +437,37 @@ export class IndexingService {
     return this.traverseMapping(index, mapping);
   }
 
-  traverseMapping(index: string, mapping: any, type?: SpecialType): MappingField[] {
-    return traverse(mapping).reduce(function find(acc: MappingField[], node: any): MappingField[] {
-      if (_.isNil(node)) {
-        return acc;
-      }
-
-      if ((type && node.type == type) || (!type && node.type)) {
-        const segments = _.pull(this.path, 'properties', 'mappings', index);
-        if (node.type != 'nested') {
-          acc.push({
-            node,
-            path: segments.join('.'),
-          });
+  traverseMapping(index: string, mapping: any,
+    type?: SpecialType): MappingField[] {
+    return traverse(mapping)
+      .reduce(function find(acc: MappingField[], node: any): MappingField[] {
+        if (_.isNil(node)) {
+          return acc;
         }
-      }
 
-      return acc;
-    }, []);
+        if ((type && node.type == type) || (!type && node.type)) {
+          const segments = _.pull(this.path, 'properties', 'mappings', index);
+          if (node.type != 'nested') {
+            acc.push({
+              node,
+              path: segments.join('.'),
+            });
+          }
+        }
+
+        return acc;
+      }, []);
   }
 
   async convertDocument(resourceName: string, document: any): Promise<any> {
     if (!this.mappings.has(resourceName)) {
-      throw new InvalidResourceError(`MappingSettings for resource ${resourceName} was not provided`);
+      throw new InvalidResourceError(
+        `MappingSettings for resource ${resourceName} was not provided`);
     }
 
     if (this.relationsConfigs.has(resourceName)) {
-      await this.resolveResourceRelations(resourceName, document, this.relationsConfigs.get(resourceName));
+      await this.resolveResourceRelations(resourceName, document,
+        this.relationsConfigs.get(resourceName));
     }
 
     const mapping = this.mappings.get(resourceName);
@@ -455,7 +479,8 @@ export class IndexingService {
         const geoPointPath = geoPoint.path;
         const location = _.get(document, geoPointPath);
         if (_.isNil(location)) {
-          this.logger.warn(`Resource ${resourceName} has no geo_point field in path ${geoPointPath}`);
+          this.logger.warn(
+            `Resource ${resourceName} has no geo_point field in path ${geoPointPath}`);
           continue;
         }
 
@@ -536,8 +561,7 @@ export class IndexingService {
         if (field && field.node && field.node.type &&
           field.node.type == 'long') {
           _.set(filtered, path, Number(_.get(document, path)));
-        }
-        else {
+        } else {
           _.set(filtered, path, _.get(document, path));
         }
       }
@@ -550,7 +574,8 @@ export class IndexingService {
     filtered[key] = document[key];
   }
 
-  async resolveResourceRelations(index: string, document: any, relationsCfg: Relation[]): Promise<any> {
+  async resolveResourceRelations(index: string, document: any,
+    relationsCfg: Relation[]): Promise<any> {
 
     for (let property in document) {
       for (let relation of relationsCfg) {
@@ -581,11 +606,13 @@ export class IndexingService {
             if (pathPrefix) {
               let docArray = document[pathPrefix];
               for (let i = 0; i < docArray.length; i++) {
-                data = await this.resourceProvider.getResources(relation.entity, docArray[i][relation.field]);
+                data = await this.resourceProvider.getResources(relation.entity,
+                  docArray[i][relation.field]);
                 docArray[i][relation.mappingProperty] = data;
               }
             } else {
-              data = await this.resourceProvider.getResources(relation.entity, document[eachProperty]);
+              data = await this.resourceProvider.getResources(relation.entity,
+                document[eachProperty]);
               delete document[eachProperty];
             }
             if (relation.relations) {
@@ -609,7 +636,7 @@ export class IndexingService {
       await this.client.deleteByQuery({
         index,
         body: {
-          query: { match_all: {} }
+          query: {match_all: {}}
         }
       });
     }

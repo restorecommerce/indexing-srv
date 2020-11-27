@@ -1,16 +1,12 @@
-import * as mocha from 'mocha';
 import * as should from 'should';
-
-import { config } from '@restorecommerce/chassis-srv';
-import { Events, Topic } from '@restorecommerce/kafka-client';
-
+import {config} from '@restorecommerce/chassis-srv';
+import {Events, Topic} from '@restorecommerce/kafka-client';
 import * as _ from 'lodash';
 import * as bodybuilder from 'bodybuilder';
 import * as elasticsearch from '@elastic/elasticsearch';
 import * as uuid from 'uuid';
-
-import { Worker } from '../src/worker';
-import { Client } from '@restorecommerce/grpc-client';
+import {Worker} from '../src/worker';
+import {Client} from '@restorecommerce/grpc-client';
 
 describe('Service tests', () => {
   let cfg: any;
@@ -38,7 +34,8 @@ describe('Service tests', () => {
     const esCfg = _.cloneDeep(cfg.get('elasticsearch:client'));
     esClient = new elasticsearch.Client(esCfg);
 
-    const grpcClient = new Client(cfg.get('client:services:indexing-srv'), logger);
+    const grpcClient = new Client(cfg.get('client:services:indexing-srv'),
+      logger);
     searchService = await grpcClient.connect();
   });
 
@@ -47,95 +44,101 @@ describe('Service tests', () => {
 
     await esClient.deleteByQuery({
       index: 'organization',
-      body: { query: { match_all: {} } },
+      body: {query: {match_all: {}}},
       refresh: true
     });
 
-    await esClient.indices.refresh({ index: 'organization' });
+    await esClient.indices.refresh({index: 'organization'});
 
     await service.stop();
   });
 
-  it('should have created a index for each resource at startup', async function checkES(): Promise<void> {
-    const response = await esClient.indices.exists({
-      index: 'organization'
+  it('should have created a index for each resource at startup',
+    async function checkES(): Promise<void> {
+      const response = await esClient.indices.exists({
+        index: 'organization'
+      });
+      should.exist(response);
+      response.body.should.equal(true);
     });
-    should.exist(response);
-    response.body.should.equal(true);
-  });
 
   describe('indexing emitted Kafka data', () => {
-    it('should index a new document', async function consumeEvents(): Promise<void> {
-      this.timeout(4000);
-      data = makeCreateOrgRequest();
-      origClonedData = _.cloneDeep(data);
-      await indexer.update('organization', data, 'create', true);
+    it('should index a new document',
+      async function consumeEvents(): Promise<void> {
+        this.timeout(4000);
+        data = makeCreateOrgRequest();
+        origClonedData = _.cloneDeep(data);
+        await indexer.update('organization', data, 'create', true);
 
-      await esClient.indices.refresh({ index: 'organization' });
+        await esClient.indices.refresh({index: 'organization'});
 
-      const response = await esClient.search({
-        index: 'organization',
-        body: makeESQuery()
-      });
-
-      should.exist(response);
-      should.exist(response.body.hits);
-      should.exist(response.body.hits.hits);
-      response.body.hits.total.value.should.equal(1);
-
-      const src = response.body.hits.hits[0]._source;
-      const doc = _.pick(src, ['name', 'website', 'email', 'address', 'meta']);
-      doc['id'] = response.body.hits.hits[0]._id;
-      doc.should.deepEqual(origClonedData);
-    });
-    // NOTE: updates should only work properly once the Protobuf issue with default null fields is solved
-    it('should perform partial updates', async function consumeEvents(): Promise<void> {
-      const partialData = makeModifyOrgRequest(data);
-      const updatedData = _.defaults({}, partialData, origClonedData);
-      const compareData = _.cloneDeep(updatedData);
-      // await topic.emit('organizationModified', updatedData);
-      await indexer.update('organization', updatedData, 'modify', true);
-
-      await esClient.indices.refresh({ index: 'organization' });
-
-      let response: elasticsearch.ApiResponse;
-      for (let i = 0; i < 10; i += 1) {
-        response = await esClient.search({
+        const response = await esClient.search({
           index: 'organization',
           body: makeESQuery()
         });
-      }
 
-      should.exist(response.body.hits);
-      should.exist(response.body.hits.hits);
-      response.body.hits.hits.should.have.length(1);
-      should.exist(response.body.hits.hits[0]._source);
-      const src = response.body.hits.hits[0]._source;
-      const doc = _.pick(src, ['name', 'website', 'email', 'address', 'meta']);
-      doc['id'] = response.body.hits.hits[0]._id;
-      doc.should.deepEqual(compareData);
-    });
-    it('should delete indexed messages', async function consumeEvents(): Promise<void> {
-      this.timeout(4000);
-      await topic.emit('organizationDeleted', {
-        id: data.id
+        should.exist(response);
+        should.exist(response.body.hits);
+        should.exist(response.body.hits.hits);
+        response.body.hits.total.value.should.equal(1);
+
+        const src = response.body.hits.hits[0]._source;
+        const doc = _.pick(src,
+          ['name', 'website', 'email', 'address', 'meta']);
+        doc['id'] = response.body.hits.hits[0]._id;
+        doc.should.deepEqual(origClonedData);
       });
+    // NOTE: updates should only work properly once the Protobuf issue with default null fields is solved
+    it('should perform partial updates',
+      async function consumeEvents(): Promise<void> {
+        const partialData = makeModifyOrgRequest(data);
+        const updatedData = _.defaults({}, partialData, origClonedData);
+        const compareData = _.cloneDeep(updatedData);
+        // await topic.emit('organizationModified', updatedData);
+        await indexer.update('organization', updatedData, 'modify', true);
 
-      await esClient.indices.refresh({ index: 'organization' });
+        await esClient.indices.refresh({index: 'organization'});
 
-      // Sleep due to eventual consistency
-      await new Promise(resolve => setTimeout(resolve, 2000));
+        let response: elasticsearch.ApiResponse;
+        for (let i = 0; i < 10; i += 1) {
+          response = await esClient.search({
+            index: 'organization',
+            body: makeESQuery()
+          });
+        }
 
-      const response = await esClient.search({
-        index: 'organization',
-        body: makeESQuery()
+        should.exist(response.body.hits);
+        should.exist(response.body.hits.hits);
+        response.body.hits.hits.should.have.length(1);
+        should.exist(response.body.hits.hits[0]._source);
+        const src = response.body.hits.hits[0]._source;
+        const doc = _.pick(src,
+          ['name', 'website', 'email', 'address', 'meta']);
+        doc['id'] = response.body.hits.hits[0]._id;
+        doc.should.deepEqual(compareData);
       });
+    it('should delete indexed messages',
+      async function consumeEvents(): Promise<void> {
+        this.timeout(4000);
+        await topic.emit('organizationDeleted', {
+          id: data.id
+        });
 
-      should.exist(response);
-      should.exist(response.body.hits);
-      should.exist(response.body.hits.hits);
-      response.body.hits.total.value.should.equal(0);
-    });
+        await esClient.indices.refresh({index: 'organization'});
+
+        // Sleep due to eventual consistency
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        const response = await esClient.search({
+          index: 'organization',
+          body: makeESQuery()
+        });
+
+        should.exist(response);
+        should.exist(response.body.hits);
+        should.exist(response.body.hits.hits);
+        response.body.hits.total.value.should.equal(0);
+      });
     describe('fulltext search', () => {
       let orgA, orgB;
       const orgIDA = uuid.v4().replace(/-/g, '');
@@ -146,7 +149,7 @@ describe('Service tests', () => {
           name: 'Foo Bar',
           address: {
             country:
-              { name: 'Germany' },
+              {name: 'Germany'},
             street: 'Maximilianstraße',
             postcode: '81929',
             locality: 'Munich'
@@ -154,7 +157,7 @@ describe('Service tests', () => {
           contact_point: {
             telephone: 17612345678,
             address: {
-              country: { name: 'Germany' },
+              country: {name: 'Germany'},
               street: 'HeadQuarterstraße1',
               postcode: '70412',
               locality: 'Berlin'
@@ -170,7 +173,7 @@ describe('Service tests', () => {
           name: 'John Doe GmbH',
           address: {
             country:
-              { name: 'Germany' },
+              {name: 'Germany'},
             street: 'Tübingerstraße',
             postcode: '70178',
             locality: 'Stuttgart'
@@ -178,7 +181,7 @@ describe('Service tests', () => {
           contact_point: {
             telephone: 176187654321,
             address: {
-              country: { name: 'Germany' },
+              country: {name: 'Germany'},
               street: 'HeadQuarterstraße2',
               postcode: '70123',
               locality: 'Hamburg'
@@ -192,9 +195,9 @@ describe('Service tests', () => {
         await esClient.bulk({
           index: 'organization',
           body: [
-            { index: { _index: 'organization', _id: orgIDA } },
+            {index: {_index: 'organization', _id: orgIDA}},
             orgA,
-            { index: { _index: 'organization', _id: orgIDB } },
+            {index: {_index: 'organization', _id: orgIDB}},
             orgB
           ]
         });
@@ -202,38 +205,40 @@ describe('Service tests', () => {
 
       });
 
-      it('should retrieve documents by providing a text', async function (): Promise<void> {
-        this.timeout(4000);
+      it('should retrieve documents by providing a text',
+        async function (): Promise<void> {
+          this.timeout(4000);
 
-        await esClient.indices.refresh({ index: 'organization' });
+          await esClient.indices.refresh({index: 'organization'});
 
-        const searchAndValidate = async function (text: string, expectedLength: number): Promise<void> {
-          // performing fulltext search
-          const result = await searchService.search({
-            collection: 'organization',
-            text
-          });
-          should.exist(result);
-          should.not.exist(result.error);
-          should.exist(result.data);
-          should.exist(result.data.data);
-          result.data.data.should.be.length(expectedLength);
-        };
+          const searchAndValidate = async function (text: string,
+                                                    expectedLength: number): Promise<void> {
+            // performing fulltext search
+            const result = await searchService.search({
+              collection: 'organization',
+              text
+            });
+            should.exist(result);
+            should.not.exist(result.error);
+            should.exist(result.data);
+            should.exist(result.data.data);
+            result.data.data.should.be.length(expectedLength);
+          };
 
-        // Search is based on ngram tokenizer with minimum search length
-        // of 4 characters
-        await searchAndValidate('Germany', 2);
-        await searchAndValidate('straße', 2);
-        await searchAndValidate('1234', 1);
-        // search by phone_number
-        await searchAndValidate('5678', 1);
-        await searchAndValidate('1761', 2);
-        await searchAndValidate('Foo Doe', 2);
-        // case insensitive search
-        await searchAndValidate('foo bar', 1);
-        // Email search
-        await searchAndValidate('info@', 2);
-      });
+          // Search is based on ngram tokenizer with minimum search length
+          // of 4 characters
+          await searchAndValidate('Germany', 2);
+          await searchAndValidate('straße', 2);
+          await searchAndValidate('1234', 1);
+          // search by phone_number
+          await searchAndValidate('5678', 1);
+          await searchAndValidate('1761', 2);
+          await searchAndValidate('Foo Doe', 2);
+          // case insensitive search
+          await searchAndValidate('foo bar', 1);
+          // Email search
+          await searchAndValidate('info@', 2);
+        });
     });
   });
 });
