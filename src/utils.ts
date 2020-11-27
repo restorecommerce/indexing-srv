@@ -5,16 +5,17 @@ export interface Attribute {
   value: string;
 }
 
-export const getSubTreeOrgs = async(orgID: String, direction: string, graphService: any,
-  cfg: any, logger: any): Promise<Set<string>> => {
+export const getSubTreeOrgs = async (orgID: String, direction: string,
+  graphService: any, cfg: any, logger: any): Promise<Set<string>> => {
   let subOrgTreeList = new Set<string>();
-  const hierarchicalResources = cfg.get('authorization:hierarchicalResources') || [];
+  const hierarchicalResources = cfg.get(
+    'authorization:hierarchicalResources') || [];
   for (let hierarchicalResource of hierarchicalResources) {
-    const { collection, edge } = hierarchicalResource;
+    const {collection, edge} = hierarchicalResource;
     const start_vertex = `${collection}/${orgID}`;
     const result = await graphService.traversal({
       start_vertex, opts: {
-        expander: [{ edge, direction }]
+        expander: [{edge, direction}]
       },
       path: true
     });
@@ -70,7 +71,8 @@ export const getSubTreeOrgs = async(orgID: String, direction: string, graphServi
   return subOrgTreeList;
 };
 
-export function createResourceTarget(resources: any[], action: string, cfg: any): any {
+export function createResourceTarget(resources: any[], action: string,
+  cfg: any): any {
   const flattened: Attribute[] = [];
   const urns = cfg.get('authorization:urns');
   resources.forEach((resource) => {

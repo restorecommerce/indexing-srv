@@ -1,10 +1,11 @@
 import * as _ from 'lodash';
-import { Client, toStruct } from '@restorecommerce/grpc-client';
+import {Client, toStruct} from '@restorecommerce/grpc-client';
 
 export class ResourceProvider {
   resourceClients: Map<string, any>;
   clientCfg: any;
   logger: any;
+
   constructor(clientCfg: any, logger: any) {
     this.resourceClients = new Map<string, Client>();
     this.clientCfg = clientCfg;
@@ -25,19 +26,19 @@ export class ResourceProvider {
           config = _.cloneDeep(defaultConfig);
           const resourceClientCfg = serviceCfg[serviceName][resourceName];
           //  resource-specific configs
-          config.transports.grpc.protos = resourceClientCfg.protos;  //  proto file
-          config.transports.grpc.service = resourceClientCfg.serviceName;  //  proto file service name
+          config.transports.grpc.protos = resourceClientCfg.protos; // proto file
+          config.transports.grpc.service = resourceClientCfg.serviceName; // proto file service name
           const client = new Client(config, this.logger);
           const service = await client.connect();
           this.resourceClients.set(resourceName, service);
-          this.logger.verbose('Created client for resource', { resourceName });
+          this.logger.verbose('Created client for resource', {resourceName});
         }
       } else if (serviceName != 'indexing-srv') {
         config = serviceCfg[serviceName];
         const client = new Client(config, this.logger);
         const service = await client.connect();
         this.resourceClients.set(serviceName, service);
-        this.logger.verbose('Created client for resource', { serviceName });
+        this.logger.verbose('Created client for resource', {serviceName});
       }
     }
   }
@@ -60,10 +61,11 @@ export class ResourceProvider {
     }
     const client = this.resourceClients.get(entity);
     if (!client) {
-      this.logger.error('No client was found for retrieving resources of type', { entity });
+      this.logger.error('No client was found for retrieving resources of type',
+        {entity});
     }
 
-    const result = await client.read({ filter: toStruct(filter) });
+    const result = await client.read({filter: toStruct(filter)});
     if (result.error) {
       this.logger.error('Error while resolving resource relation', {
         error: result.error.name,
