@@ -1,11 +1,17 @@
+# 0.0.14
+
+- Updated dependencies
+- Updated config
+- Updated Dockerfile to use correct docker base image
+
 # 0.0.13
 
-* Updated dependencies
+- Updated dependencies
 
 # 0.0.12
 
-* Updated dependencies
-* Public release
+- Updated dependencies
+- Public release
 
 # 0.0.11
 
