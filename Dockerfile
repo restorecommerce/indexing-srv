@@ -10,8 +10,6 @@ VOLUME $APP_HOME/protos
 ADD --chown=node . $APP_HOME
 RUN chown -R node:node $HOME
 USER node
-COPY --chown=node rsa_key $HOME/.ssh
-RUN chmod -R 700 $HOME/.ssh
 RUN npm install
 RUN npm run build
 EXPOSE 50051
