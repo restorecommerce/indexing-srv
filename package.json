@@ -70,7 +70,7 @@
     "mocha": "cross-env NODE_ENV=test mocha -R spec ./test/*.js --full-trace --exit",
     "pretest": "npm run createtopics:test && npm run build && npm run tsctests",
     "start": "npm run createtopics && node lib/start.js",
-    "test": "npm run mocha",
+    "test": "nyc npm run mocha",
     "test-debug": "mocha ./test/*.js --inspect-brk --exit",
     "tsctests": "tsc test/*.ts --module commonjs --skipLibCheck true -target ES6"
   },
