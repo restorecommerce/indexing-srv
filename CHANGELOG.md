@@ -1,3 +1,7 @@
+# 0.0.16 (January 12th, 2021)
+
+- updated dependencies
+
 # 0.0.15 (December 2nd, 2020)
 
 - fix docker image permissions
