@@ -1,3 +1,7 @@
+# 0.0.17 (March 22nd, 2021)
+
+- updated dependencies
+
 # 0.0.16 (January 12th, 2021)
 
 - updated dependencies
