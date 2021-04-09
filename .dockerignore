@@ -1,19 +1,17 @@
-node_modules/
 npm-debug.log
 
+node_modules/
 coverage/
 
-.idea/
 .project
 .settings
-.directory
-.vscode
 
 .git*
 
 *.log
-*.db
 *~
 
-!.eslintrc.js
+buildImage.bash
+Dockerfile
+.dockerignore
 lib/
