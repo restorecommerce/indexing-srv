@@ -36,7 +36,7 @@ jobs:
         uses: restorecommerce/setup-system-action@v1
 
       - name: Install Dependencies
-        run: npm i
+        run: npm ci
 
       - name: Test
         run: npm run test && npm run lcov-report
