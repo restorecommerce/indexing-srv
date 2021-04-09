@@ -5,7 +5,6 @@ FROM node:14.15.5-alpine as base
 
 RUN npm install -g npm
 RUN npm install -g typescript@3.4.1
-RUN chown -R 1000:1000 "/home/node/.npm"
 
 USER node
 ARG APP_HOME=/home/node/srv
