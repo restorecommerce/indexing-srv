@@ -31,7 +31,7 @@
     "kafka-node": "^5.0.0",
     "lodash": "^4.17.21",
     "long": "^4.0.0",
-    "redis": "^3.0.2",
+    "redis": "^3.1.2",
     "traverse": "^0.6.6"
   },
   "devDependencies": {
