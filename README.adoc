@@ -1,8 +1,8 @@
 = Indexing Service
 
 https://travis-ci.org/restorecommerce/indexing-srv?branch=master[image:https://img.shields.io/travis/restorecommerce/indexing-srv/master.svg?style=flat-square[Build Status]]
-https://david-dm.org/restorecommerce/indexing-srv[image:https://img.shields.io/david/restorecommerce/indexing-srv.svg?style=flat-square[Dependencies]]
-https://coveralls.io/github/restorecommerce/indexing-srv?branch=master[image:https://img.shields.io/coveralls/restorecommerce/indexing-srv/master.svg?style=flat-square[Coverage Status]]
+https://depfu.com/repos/github/restorecommerce/indexing-srv?branch=master[image:https://img.shields.io/depfu/dependencies/github/restorecommerce/indexing-srv?style=flat-square[Dependencies]]
+https://coveralls.io/github/restorecommerce/indexing-srv?branch=master[image:https://img.shields.io/coveralls/github/restorecommerce/indexing-srv/master.svg?style=flat-square[Coverage Status]]
 
 A microservice for indexing events.
 
