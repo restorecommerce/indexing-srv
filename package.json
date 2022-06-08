@@ -25,7 +25,7 @@
     "@restorecommerce/logger": "^0.6.4",
     "@restorecommerce/protos": "^0.0.22",
     "@restorecommerce/service-config": "^0.4.1",
-    "async": "^3.1.0",
+    "async": "^3.2.4",
     "bodybuilder": "^2.4.0",
     "jsonfile": "^6.1.0",
     "kafka-node": "^5.0.0",
