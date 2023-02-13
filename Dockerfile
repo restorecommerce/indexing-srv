@@ -1,10 +1,6 @@
-# syntax = docker/dockerfile:experimental
-
 ### Base
 FROM node:14.15.5-alpine as base
-
-RUN npm install -g npm
-RUN npm install -g typescript@3.4.1
+ENV NO_UPDATE_NOTIFIER=true
 
 USER node
 ARG APP_HOME=/home/node/srv
