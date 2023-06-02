@@ -7,7 +7,7 @@ import {Logger} from 'winston';
 import {IndexingService} from './service';
 import {IndexingCommandInterface} from './commandInterface';
 import {formatResourceType} from './utils';
-import {createClient, RedisClient} from 'redis';
+import {createClient} from 'redis';
 
 export class Worker {
   cfg: any;
@@ -17,7 +17,8 @@ export class Worker {
   indexer: IndexingService;
   commandInterface: CommandInterface;
   offsetStore: OffsetStore;
-  redisClient: RedisClient;
+
+  redisClient = createClient();
 
   async start(cfg?: any, logger?: Logger, mappingsDir?: string): Promise<void> {
     cfg = cfg || await config.get(logger);

@@ -409,8 +409,8 @@ export class IndexingService {
       body: mapping
     });
 
-    if (!result.body.acknowledged) {
-      this.logger.error(`Index ${index} was not acknowledged`, result.body);
+    if (!result.acknowledged) {
+      this.logger.error(`Index ${index} was not acknowledged`, result);
       return;
     }
 

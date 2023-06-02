@@ -5,7 +5,7 @@ import {CommandInterface, Server} from '@restorecommerce/chassis-srv';
 import {Events} from '@restorecommerce/kafka-client';
 import {IndexingService} from './service';
 import {InvalidArgument} from '@restorecommerce/chassis-srv/lib/microservice/errors';
-import {RedisClient} from 'redis';
+import {createClient} from 'redis';
 
 export class IndexingCommandInterface extends CommandInterface {
   indexer: IndexingService;
@@ -44,7 +44,7 @@ export class IndexingCommandInterface extends CommandInterface {
       }
 
       const topicCfg = topicsCfg[`${entity}s.resource`];
-      const topic = this.kafkaEvents.topic(topicCfg.topic);
+      const topic = await this.kafkaEvents.topic(topicCfg.topic);
       const targetOffset = await topic.$offset(-1);
 
       const previousListeners = {};
