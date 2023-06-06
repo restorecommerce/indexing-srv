@@ -63,12 +63,10 @@
     "coveralls": "cross-env NODE_ENV=test; nyc --reporter text --reporter lcov npm test",
     "dev": "cross-env NODE_ENV=development nodemon --watch './src/**/*.ts' --exec 'ts-node' src/start.ts",
     "lint": "eslint src --ext .ts",
-    "mocha": "cross-env NODE_ENV=test mocha -R spec ./test/*.js --full-trace --exit",
-    "pretest": "npm run build && npm run tsctests",
+    "mocha": "cross-env NODE_ENV=test mocha --full-trace --exit --timeout 30000",
     "start": " node lib/start.js",
     "test": "nyc npm run mocha",
-    "test-debug": "mocha ./test/*.js --inspect-brk --exit",
-    "tsctests": "tsc test/*.ts --module commonjs --skipLibCheck true -target ES6"
+    "test-debug": "npm run mocha -- --inspect-brk"
   },
   "engines": {
     "node": ">= 18.0.0"

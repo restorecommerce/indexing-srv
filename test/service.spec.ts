@@ -2,12 +2,12 @@ import * as should from 'should';
 import { config } from '@restorecommerce/chassis-srv';
 import { Events, Topic } from '@restorecommerce/kafka-client';
 import * as _ from 'lodash';
-import * as bodybuilder from 'bodybuilder';
 import * as elasticsearch from '@elastic/elasticsearch';
 import * as uuid from 'uuid';
 import { Worker } from '../src/worker';
 import { createChannel, createClient } from '@restorecommerce/grpc-client';
 import { SearchServiceDefinition } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/search';
+const bodybuilder = require('bodybuilder');
 
 describe('Service tests', () => {
   let cfg: any;

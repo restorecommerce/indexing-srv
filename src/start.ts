@@ -1,4 +1,4 @@
-import * as Cluster from '@restorecommerce/cluster-service';
+import Cluster from '@restorecommerce/cluster-service';
 import {config} from '@restorecommerce/chassis-srv';
 
 const start = async (): Promise<void> => {

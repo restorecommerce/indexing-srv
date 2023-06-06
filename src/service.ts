@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as elasticsearch from '@elastic/elasticsearch';
 import * as jsonfile from 'jsonfile';
-import * as traverse from 'traverse';
+import traverse from 'traverse';
 import { errors } from '@restorecommerce/chassis-srv';
 import { ResourceProvider } from './resourceProvider';
 import {
