@@ -126,62 +126,35 @@
       "provider": "kafka",
       "groupId": "indexing-srv",
       "clientId": "indexing-srv",
-      "kafkaHost": "localhost:29092",
+      "kafka": {
+        "clientId": "restore-indexing-srv",
+        "brokers": [
+          "localhost:29092"
+        ]
+      },
       "latestOffset": false,
       "healthCheckCommand": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
       },
       "healthCheckResponse": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
       },
       "versionCommand": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
       },
       "versionResponse": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
       },
       "restoreCommand": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
       },
       "restoreResponse": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
       },
       "resetCommand": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
       },
       "resetResponse": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
       },
       "protos": [
@@ -201,137 +174,29 @@
     }
   },
   "client": {
-    "services": {
-      "default": {
-        "country": {
-          "config": "default-resource-srv",
-          "protos": [
-            "io/restorecommerce/country.proto"
-          ],
-          "serviceName": "io.restorecommerce.country.Service"
-        },
-        "organization": {
-          "config": "default-resource-srv",
-          "protos": [
-            "io/restorecommerce/organization.proto"
-          ],
-          "serviceName": "io.restorecommerce.organization.Service"
-        },
-        "contact_point": {
-          "config": "default-resource-srv",
-          "protos": [
-            "io/restorecommerce/contact_point.proto"
-          ],
-          "serviceName": "io.restorecommerce.contact_point.Service"
-        },
-        "location": {
-          "config": "default-resource-srv",
-          "protos": [
-            "io/restorecommerce/location.proto"
-          ],
-          "serviceName": "io.restorecommerce.location.Service"
-        },
-        "address": {
-          "config": "default-resource-srv",
-          "protos": [
-            "io/restorecommerce/address.proto"
-          ],
-          "serviceName": "io.restorecommerce.address.Service"
-        }
-      },
-      "acs-srv": {
-        "transports": {
-          "grpc": {
-            "service": "io.restorecommerce.access_control.Service",
-            "protos": [
-              "io/restorecommerce/access_control.proto"
-            ],
-            "protoRoot": "node_modules/@restorecommerce/protos/",
-            "timeout": 3000
-          }
-        },
-        "loadbalancer": {
-          "name": "roundRobin"
-        },
-        "publisher": {
-          "name": "static",
-          "instances": [
-            "grpc://localhost:50061"
-          ]
-        },
-        "endpoints": {
-          "whatIsAllowed": {}
-        }
-      },
-      "graph-srv": {
-        "transports": {
-          "grpc": {
-            "service": "io.restorecommerce.graph.Service",
-            "protos": [
-              "io/restorecommerce/graph.proto"
-            ],
-            "protoRoot": "node_modules/@restorecommerce/protos/",
-            "timeout": 3000
-          }
-        },
-        "loadbalancer": {
-          "name": "roundRobin"
-        },
-        "publisher": {
-          "name": "static",
-          "instances": [
-            "grpc://localhost:50053"
-          ]
-        },
-        "endpoints": {
-          "traversal": {}
-        }
-      },
-      "role": {
-        "transports": {
-          "grpc": {
-            "service": "io.restorecommerce.role.Service",
-            "protos": [
-              "io/restorecommerce/role.proto"
-            ],
-            "protoRoot": "node_modules/@restorecommerce/protos/",
-            "timeout": 3000
-          }
-        },
-        "loadbalancer": {
-          "name": "roundRobin"
-        },
-        "publisher": {
-          "name": "static",
-          "instances": [
-            "grpc://localhost:50051"
-          ]
-        },
-        "endpoints": {
-          "read": {}
-        }
-      }
+    "country": {
+      "address": "localhost:50053"
     },
-    "default-resource-srv": {
-      "transports": {
-        "grpc": {
-          "service": "",
-          "timeout": 3000,
-          "protoRoot": "node_modules/@restorecommerce/protos/"
-        }
-      },
-      "loadbalancer": {
-        "name": "roundRobin"
-      },
-      "publisher": {
-        "name": "static",
-        "instances": [
-          "grpc://localhost:50053"
-        ]
-      },
-      "endpoints": {
-        "read": {}
-      }
+    "organization": {
+      "address": "localhost:50053"
+    },
+    "contact_point": {
+      "address": "localhost:50053"
+    },
+    "location": {
+      "address": "localhost:50053"
+    },
+    "address": {
+      "address": "localhost:50053"
+    },
+    "acs": {
+      "address": "localhost:50061"
+    },
+    "graph": {
+      "address": "localhost:50053"
+    },
+    "role": {
+      "address": "localhost:50051"
     }
   },
   "authorization": {

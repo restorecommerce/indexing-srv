@@ -1,13 +1,22 @@
-import {Events} from '@restorecommerce/kafka-client';
+import { Events, registerProtoMeta } from '@restorecommerce/kafka-client';
 import {
   CommandInterface, config, Health, OffsetStore, Server
 } from '@restorecommerce/chassis-srv';
-import {createLogger} from '@restorecommerce/logger';
-import {Logger} from 'winston';
-import {IndexingService} from './service';
-import {IndexingCommandInterface} from './commandInterface';
-import {formatResourceType} from './utils';
-import {createClient} from 'redis';
+import { createLogger } from '@restorecommerce/logger';
+import { Logger } from 'winston';
+import { IndexingService } from './service';
+import { IndexingCommandInterface } from './commandInterface';
+import { formatResourceType } from './utils';
+import { createClient, RedisClientType } from 'redis';
+import { protoMetadata as commandInterfaceMeta, CommandInterfaceServiceDefinition } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/commandinterface';
+import { protoMetadata as healthInterfaceMeta, HealthDefinition } from '@restorecommerce/rc-grpc-clients/dist/generated-server/grpc/health/v1/health';
+import { BindConfig } from '@restorecommerce/chassis-srv/lib/microservice/transport/provider/grpc';
+import { SearchServiceDefinition } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/search';
+
+registerProtoMeta(
+  commandInterfaceMeta,
+  healthInterfaceMeta
+);
 
 export class Worker {
   cfg: any;
@@ -17,8 +26,7 @@ export class Worker {
   indexer: IndexingService;
   commandInterface: CommandInterface;
   offsetStore: OffsetStore;
-
-  redisClient = createClient();
+  redisClient: RedisClientType<any, any>;
 
   async start(cfg?: any, logger?: Logger, mappingsDir?: string): Promise<void> {
     cfg = cfg || await config.get(logger);
@@ -46,27 +54,39 @@ export class Worker {
       const topicName = topicCfg.topic;
       const eventNames = topicCfg.events;
 
-      const topic = events.topic(topicName);
+      const topic = await events.topic(topicName);
       const offsetValue = await offsetStore.getOffset(topicName);
       for (let event of eventNames) {
         await topic.on(event, this.listener.bind(this),
-          {startingOffset: offsetValue});
+          { startingOffset: offsetValue });
       }
     }
 
     const redisConfig = cfg.get('redis');
     redisConfig.db = this.cfg.get('redis:db-indexes:db-subject');
     this.redisClient = createClient(redisConfig);
+    this.redisClient.on('error', (err) => logger.error('Redis Client Error', err));
+    await this.redisClient.connect();
 
     const server = new Server(cfg.get('server'), logger);
     this.commandInterface =
       new IndexingCommandInterface(server, cfg, logger, events, indexer,
         this.redisClient);
 
-    await server.bind('io-restorecommerce-indexing-cis', this.commandInterface);
-    await server.bind('io-restorecommerce-indexing-srv', indexer);
+    await server.bind('io-restorecommerce-indexing-cis', {
+      service: CommandInterfaceServiceDefinition,
+      implementation: this.commandInterface
+    } as BindConfig<CommandInterfaceServiceDefinition>);
 
-    await server.bind('grpc-health-v1', new Health(this.commandInterface));
+    await server.bind('io-restorecommerce-indexing-srv', {
+      service: SearchServiceDefinition,
+      implementation: indexer
+    } as BindConfig<SearchServiceDefinition>);
+
+    await server.bind('grpc-health-v1', {
+      service: HealthDefinition,
+      implementation: new Health(this.commandInterface)
+    } as BindConfig<HealthDefinition>);
 
     this.server = server;
     await server.start();
@@ -100,7 +120,7 @@ export class Worker {
     const resourcesCfg = cfg.get('resources'); // list of index/resource names
 
     for (let resourceType in resourcesCfg) {
-      const {protoPathPrefix, serviceNamePrefix, protoRoot, resources} = resourcesCfg[resourceType];
+      const { protoPathPrefix, serviceNamePrefix, protoRoot, resources } = resourcesCfg[resourceType];
       for (let resourceName of resources) {
         const topicCfg = {
           topic: `${serviceNamePrefix}${resourceName}s.resource`,

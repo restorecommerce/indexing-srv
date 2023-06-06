@@ -1,22 +1,22 @@
 import * as _ from 'lodash';
 import * as kafka from 'kafka-node';
 import * as async from 'async';
-import {CommandInterface, Server} from '@restorecommerce/chassis-srv';
-import {Events} from '@restorecommerce/kafka-client';
-import {IndexingService} from './service';
-import {InvalidArgument} from '@restorecommerce/chassis-srv/lib/microservice/errors';
-import {createClient} from 'redis';
+import { CommandInterface, Server } from '@restorecommerce/chassis-srv';
+import { Events } from '@restorecommerce/kafka-client';
+import { IndexingService } from './service';
+import { InvalidArgument } from '@restorecommerce/chassis-srv/lib/microservice/errors';
+import { RedisClientType } from 'redis';
 
 export class IndexingCommandInterface extends CommandInterface {
   indexer: IndexingService;
 
   constructor(server: Server, cfg: any, logger: any, events: Events,
-    indexer: IndexingService, redisClient: RedisClient) {
+    indexer: IndexingService, redisClient: RedisClientType<any, any>) {
     super(server, cfg, logger, events, redisClient);
     this.indexer = indexer;
   }
 
-  async restore({data}: { data: RestoreData[] }): Promise<any> {
+  async restore({ data }: { data: RestoreData[] }): Promise<any> {
     const kafkaCfg = this.config.events.kafka;
     const topicsCfg = kafkaCfg.topics;
     for (let restoreData of data) {
@@ -54,11 +54,11 @@ export class IndexingCommandInterface extends CommandInterface {
       }
 
       const consumerClient = new kafka.KafkaClient(
-        {kafkaHost: kafkaCfg.kafkaHost});
+        { kafkaHost: kafkaCfg.kafkaHost });
       const consumer = new kafka.Consumer(
         consumerClient,
         [
-          {topic: topic.name, offset: baseOffset}
+          { topic: topic.name, offset: baseOffset }
         ],
         {
           autoCommit: true,
@@ -146,7 +146,7 @@ export class IndexingCommandInterface extends CommandInterface {
   async reset(): Promise<any> {
     await this.indexer.deleteAllData();
     await this.commandTopic.emit('restoreResponse', {
-      services: _.keys(this.service),
+      services: Object.keys(this.service),
       payload: this.encodeMsg({
         status: 'Reset concluded successfully'
       })

@@ -43,7 +43,7 @@
     "@typescript-eslint/parser": "^5.59.8",
     "coveralls": "^3.1.1",
     "cross-env": "^7.0.3",
-    "eslint": "^8.41.0",
+    "eslint": "^8.42.0",
     "eslint-plugin-prefer-arrow-functions": "^3.1.4",
     "mocha": "^10.2.0",
     "nodemon": "^2.0.22",
@@ -62,18 +62,16 @@
     "build:tsc": "tsc -d",
     "lcov-report": "nyc report --reporter=lcov",
     "coveralls": "cross-env NODE_ENV=test; nyc --reporter text --reporter lcov npm test",
-    "createtopics": "node setupTopics.js io.restorecommerce.command",
-    "createtopics:test": "node setupTopics.js io.restorecommerce.command io.restorecommerce.organizations.resource",
     "dev": "cross-env NODE_ENV=development nodemon --watch './src/**/*.ts' --exec 'ts-node' src/start.ts",
     "lint": "eslint src --ext .ts",
     "mocha": "cross-env NODE_ENV=test mocha -R spec ./test/*.js --full-trace --exit",
-    "pretest": "npm run createtopics:test && npm run build && npm run tsctests",
-    "start": "npm run createtopics && node lib/start.js",
+    "pretest": "npm run build && npm run tsctests",
+    "start": " node lib/start.js",
     "test": "nyc npm run mocha",
     "test-debug": "mocha ./test/*.js --inspect-brk --exit",
     "tsctests": "tsc test/*.ts --module commonjs --skipLibCheck true -target ES6"
   },
   "engines": {
-    "node": ">= 12.18.3"
+    "node": ">= 18.0.0"
   }
 }

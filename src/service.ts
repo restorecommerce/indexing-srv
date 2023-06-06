@@ -8,8 +8,9 @@ import {ResourceProvider} from './resourceProvider';
 import {
   createActionTarget, createResourceTarget, getSubTreeOrgs
 } from './utils';
-import * as Long from 'long';
+const Long = require('long');
 import {Logger} from 'winston';
+import { SearchRequest, DeepPartial, SearchResponse } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/search';
 
 export class InvalidResourceError extends Error {
 }
@@ -57,15 +58,14 @@ export class IndexingService {
     return this.mappings.has(index);
   }
 
-  async search(call: SearchCall, context: any): Promise<any> {
-    const request = call.request;
+  async search(request: SearchRequest, context: any): Promise<DeepPartial<SearchResponse>> {
     if (!this.mappings.has(request.collection)) {
       throw new errors.Unimplemented(
         `Fulltext search is not configured for entity ${request.collection}`);
     }
     const body = this.makeFulltextSearchBody(request.collection, request.text,
-      request.acl);
-    let searchResponse: elasticsearch.ApiResponse;
+      request.acls);
+    let searchResponse;
     let result;
     try {
       searchResponse = await this.client.search({
@@ -78,7 +78,7 @@ export class IndexingService {
       throw (err);
     }
     if (_.isEmpty(result.hits) || result.hits.total.value == 0) {
-      return [];
+      return {};
     }
 
     const hits = result.hits.hits;
@@ -92,7 +92,7 @@ export class IndexingService {
           type_url: 'io.restorecommerce.search',
           value: Buffer.from(
             JSON.stringify(Object.assign({id: hit._id}, hit._source)))
-        };
+        } as DeepPartial<SearchResponse>;
       })
     };
   }
@@ -309,8 +309,7 @@ export class IndexingService {
   async ensureMapping(index: string): Promise<void> {
     let exists = false;
     try {
-      const existsResponse = await this.client.indices.exists<boolean>({index});
-      exists = existsResponse.body;
+      exists = await this.client.indices.exists({index});
     } catch (error) {
       if (error.status !== 404) {
         throw error;
@@ -663,14 +662,4 @@ export interface Relation {
   entity: string;
   relations?: Relation[];
   nestedPath?: string;
-}
-
-export interface SearchCall {
-  request: SearchRequest;
-}
-
-export interface SearchRequest {
-  collection: string;
-  text: string;
-  acl: string[];
 }
