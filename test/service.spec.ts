@@ -35,9 +35,9 @@ describe('Service tests', () => {
     const esCfg = _.cloneDeep(cfg.get('elasticsearch:client'));
     esClient = new elasticsearch.Client(esCfg);
 
-    const channel = createChannel(cfg.get('client:indexing-srv').address);
+    const channel = createChannel(cfg.get('test-client:indexing-srv').address);
     searchService = createClient({
-      ...cfg.get('client:indexing-srv'),
+      ...cfg.get('test-client:indexing-srv'),
       logger
     }, SearchServiceDefinition, channel);
   });
@@ -83,7 +83,7 @@ describe('Service tests', () => {
         should.exist(response);
         should.exist(response.hits);
         should.exist(response.hits.hits);
-        response.hits.total.valueOf().should.equal(1);
+        (response.hits.total as any).value.should.equal(1);
 
         const src = response.hits.hits[0]._source;
         const doc = _.pick(src,
@@ -140,7 +140,7 @@ describe('Service tests', () => {
         should.exist(response);
         should.exist(response.hits);
         should.exist(response.hits.hits);
-        response.hits.total.valueOf().should.equal(0);
+        (response.hits.total as any).value.should.equal(0);
       });
     describe('fulltext search', () => {
       let orgA, orgB;
@@ -224,8 +224,7 @@ describe('Service tests', () => {
             should.exist(result);
             should.not.exist(result.error);
             should.exist(result.data);
-            should.exist(result.data.data);
-            result.data.data.should.be.length(expectedLength);
+            result.data.should.be.length(expectedLength);
           };
 
           // Search is based on ngram tokenizer with minimum search length

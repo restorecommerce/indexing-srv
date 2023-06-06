@@ -64,17 +64,16 @@ export class IndexingService {
     }
     const body = this.makeFulltextSearchBody(request.collection, request.text,
       request.acls);
-    let searchResponse;
     let result;
     try {
-      searchResponse = await this.client.search({
+      result = await this.client.search({
         index: request.collection,
         body
       });
-      result = searchResponse.body;
-    } catch (err) {
-      this.logger.info('Error occured querying ES:', { error: err });
-      throw (err);
+      this.logger.debug('Fulltext search response', result);
+    } catch (error) {
+      this.logger.error('Error occured querying ES', { code: error.code, message: error.message, stack: error.stack });
+      throw (error);
     }
     if (_.isEmpty(result.hits) || result.hits.total.value == 0) {
       return {};

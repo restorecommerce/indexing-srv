@@ -100,6 +100,32 @@
     ]
   },
   "client": {
+    "country": {
+      "address": "localhost:50053"
+    },
+    "organization": {
+      "address": "localhost:50053"
+    },
+    "contact_point": {
+      "address": "localhost:50053"
+    },
+    "location": {
+      "address": "localhost:50053"
+    },
+    "address": {
+      "address": "localhost:50053"
+    },
+    "access_control": {
+      "address": "localhost:50061"
+    },
+    "graph": {
+      "address": "localhost:50053"
+    },
+    "role": {
+      "address": "localhost:50051"
+    }
+  },
+  "test-client": {
     "indexing-srv": {
       "address": "localhost:50064"
     }
