@@ -71,22 +71,6 @@ export const getSubTreeOrgs = async (orgID: String, direction: string,
   return subOrgTreeList;
 };
 
-export function createResourceTarget(resources: any[], action: string,
-  cfg: any): any {
-  const flattened: Attribute[] = [];
-  const urns = cfg.get('authorization:urns');
-  resources.forEach((resource) => {
-    const resourceType = this.formatResourceType(resource);
-    if (resourceType) {
-      flattened.push({
-        id: urns.entity,
-        value: urns.model + `:${resourceType}`
-      });
-    }
-  });
-  return flattened;
-}
-
 export const formatResourceType = (type: string): string => {
   // e.g: contact_point -> contact_point.ContactPoint
   const prefix = type;
@@ -95,6 +79,22 @@ export const formatResourceType = (type: string): string => {
   });
   const suffix = suffixArray.join('');
   return `${prefix}.${suffix}`;
+};
+
+export const createResourceTarget = (resources: any[], action: string,
+  cfg: any): any => {
+  const flattened: Attribute[] = [];
+  const urns = cfg.get('authorization:urns');
+  resources.forEach((resource) => {
+    const resourceType = formatResourceType(resource);
+    if (resourceType) {
+      flattened.push({
+        id: urns.entity,
+        value: urns.model + `:${resourceType}`
+      });
+    }
+  });
+  return flattened;
 };
 
 export const createActionTarget = (action: string, cfg: any): Attribute[] => {

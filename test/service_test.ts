@@ -1,12 +1,13 @@
 import * as should from 'should';
-import {config} from '@restorecommerce/chassis-srv';
-import {Events, Topic} from '@restorecommerce/kafka-client';
+import { config } from '@restorecommerce/chassis-srv';
+import { Events, Topic } from '@restorecommerce/kafka-client';
 import * as _ from 'lodash';
 import * as bodybuilder from 'bodybuilder';
 import * as elasticsearch from '@elastic/elasticsearch';
 import * as uuid from 'uuid';
-import {Worker} from '../src/worker';
-import {Client} from '@restorecommerce/grpc-client';
+import { Worker } from '../src/worker';
+import { createChannel, createClient } from '@restorecommerce/grpc-client';
+import { SearchServiceDefinition } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/search';
 
 describe('Service tests', () => {
   let cfg: any;
@@ -34,9 +35,11 @@ describe('Service tests', () => {
     const esCfg = _.cloneDeep(cfg.get('elasticsearch:client'));
     esClient = new elasticsearch.Client(esCfg);
 
-    const grpcClient = new Client(cfg.get('client:services:indexing-srv'),
-      logger);
-    searchService = await grpcClient.connect();
+    const channel = createChannel(cfg.get('client:indexing-srv').address);
+    searchService = createClient({
+      ...cfg.get('client:indexing-srv'),
+      logger
+    }, SearchServiceDefinition, channel);
   });
 
   after(async function end(): Promise<void> {
@@ -44,11 +47,11 @@ describe('Service tests', () => {
 
     await esClient.deleteByQuery({
       index: 'organization',
-      body: {query: {match_all: {}}},
+      body: { query: { match_all: {} } },
       refresh: true
     });
 
-    await esClient.indices.refresh({index: 'organization'});
+    await esClient.indices.refresh({ index: 'organization' });
 
     await service.stop();
   });
@@ -59,7 +62,7 @@ describe('Service tests', () => {
         index: 'organization'
       });
       should.exist(response);
-      response.body.should.equal(true);
+      response.should.equal(true);
     });
 
   describe('indexing emitted Kafka data', () => {
@@ -70,7 +73,7 @@ describe('Service tests', () => {
         origClonedData = _.cloneDeep(data);
         await indexer.update('organization', data, 'create', true);
 
-        await esClient.indices.refresh({index: 'organization'});
+        await esClient.indices.refresh({ index: 'organization' });
 
         const response = await esClient.search({
           index: 'organization',
@@ -78,14 +81,14 @@ describe('Service tests', () => {
         });
 
         should.exist(response);
-        should.exist(response.body.hits);
-        should.exist(response.body.hits.hits);
-        response.body.hits.total.value.should.equal(1);
+        should.exist(response.hits);
+        should.exist(response.hits.hits);
+        response.hits.total.valueOf().should.equal(1);
 
-        const src = response.body.hits.hits[0]._source;
+        const src = response.hits.hits[0]._source;
         const doc = _.pick(src,
           ['name', 'website', 'email', 'address', 'meta']);
-        doc['id'] = response.body.hits.hits[0]._id;
+        doc['id'] = response.hits.hits[0]._id;
         doc.should.deepEqual(origClonedData);
       });
     // NOTE: updates should only work properly once the Protobuf issue with default null fields is solved
@@ -97,9 +100,9 @@ describe('Service tests', () => {
         // await topic.emit('organizationModified', updatedData);
         await indexer.update('organization', updatedData, 'modify', true);
 
-        await esClient.indices.refresh({index: 'organization'});
+        await esClient.indices.refresh({ index: 'organization' });
 
-        let response: elasticsearch.ApiResponse;
+        let response;
         for (let i = 0; i < 10; i += 1) {
           response = await esClient.search({
             index: 'organization',
@@ -107,14 +110,14 @@ describe('Service tests', () => {
           });
         }
 
-        should.exist(response.body.hits);
-        should.exist(response.body.hits.hits);
-        response.body.hits.hits.should.have.length(1);
-        should.exist(response.body.hits.hits[0]._source);
-        const src = response.body.hits.hits[0]._source;
+        should.exist(response.hits);
+        should.exist(response.hits.hits);
+        response.hits.hits.should.have.length(1);
+        should.exist(response.hits.hits[0]._source);
+        const src = response.hits.hits[0]._source;
         const doc = _.pick(src,
           ['name', 'website', 'email', 'address', 'meta']);
-        doc['id'] = response.body.hits.hits[0]._id;
+        doc['id'] = response.hits.hits[0]._id;
         doc.should.deepEqual(compareData);
       });
     it('should delete indexed messages',
@@ -124,7 +127,7 @@ describe('Service tests', () => {
           id: data.id
         });
 
-        await esClient.indices.refresh({index: 'organization'});
+        await esClient.indices.refresh({ index: 'organization' });
 
         // Sleep due to eventual consistency
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -135,9 +138,9 @@ describe('Service tests', () => {
         });
 
         should.exist(response);
-        should.exist(response.body.hits);
-        should.exist(response.body.hits.hits);
-        response.body.hits.total.value.should.equal(0);
+        should.exist(response.hits);
+        should.exist(response.hits.hits);
+        response.hits.total.valueOf().should.equal(0);
       });
     describe('fulltext search', () => {
       let orgA, orgB;
@@ -149,7 +152,7 @@ describe('Service tests', () => {
           name: 'Foo Bar',
           address: {
             country:
-              {name: 'Germany'},
+              { name: 'Germany' },
             street: 'Maximilianstraße',
             postcode: '81929',
             locality: 'Munich'
@@ -157,7 +160,7 @@ describe('Service tests', () => {
           contact_point: {
             telephone: 17612345678,
             address: {
-              country: {name: 'Germany'},
+              country: { name: 'Germany' },
               street: 'HeadQuarterstraße1',
               postcode: '70412',
               locality: 'Berlin'
@@ -173,7 +176,7 @@ describe('Service tests', () => {
           name: 'John Doe GmbH',
           address: {
             country:
-              {name: 'Germany'},
+              { name: 'Germany' },
             street: 'Tübingerstraße',
             postcode: '70178',
             locality: 'Stuttgart'
@@ -181,7 +184,7 @@ describe('Service tests', () => {
           contact_point: {
             telephone: 176187654321,
             address: {
-              country: {name: 'Germany'},
+              country: { name: 'Germany' },
               street: 'HeadQuarterstraße2',
               postcode: '70123',
               locality: 'Hamburg'
@@ -195,9 +198,9 @@ describe('Service tests', () => {
         await esClient.bulk({
           index: 'organization',
           body: [
-            {index: {_index: 'organization', _id: orgIDA}},
+            { index: { _index: 'organization', _id: orgIDA } },
             orgA,
-            {index: {_index: 'organization', _id: orgIDB}},
+            { index: { _index: 'organization', _id: orgIDB } },
             orgB
           ]
         });
@@ -209,10 +212,10 @@ describe('Service tests', () => {
         async function (): Promise<void> {
           this.timeout(4000);
 
-          await esClient.indices.refresh({index: 'organization'});
+          await esClient.indices.refresh({ index: 'organization' });
 
           const searchAndValidate = async function (text: string,
-                                                    expectedLength: number): Promise<void> {
+            expectedLength: number): Promise<void> {
             // performing fulltext search
             const result = await searchService.search({
               collection: 'organization',

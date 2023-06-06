@@ -12,10 +12,14 @@ import { protoMetadata as commandInterfaceMeta, CommandInterfaceServiceDefinitio
 import { protoMetadata as healthInterfaceMeta, HealthDefinition } from '@restorecommerce/rc-grpc-clients/dist/generated-server/grpc/health/v1/health';
 import { BindConfig } from '@restorecommerce/chassis-srv/lib/microservice/transport/provider/grpc';
 import { SearchServiceDefinition } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/search';
+import { protoMetadata as addressProtoMeta } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/address';
+import { protoMetadata as organizationProtoMeta } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/organization';
+import { protoMetadata as contactPointProtoMeta } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/contact_point';
+import { protoMetadata as userProtoMeta } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/user';
 
 registerProtoMeta(
-  commandInterfaceMeta,
-  healthInterfaceMeta
+  commandInterfaceMeta, healthInterfaceMeta, addressProtoMeta,
+  organizationProtoMeta, contactPointProtoMeta, userProtoMeta
 );
 
 export class Worker {
@@ -90,6 +94,7 @@ export class Worker {
 
     this.server = server;
     await server.start();
+    this.logger.info('Server started successfully');
   }
 
   async stop(): Promise<void> {

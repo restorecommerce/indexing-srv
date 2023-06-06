@@ -16,7 +16,7 @@ import {
   AddressServiceDefinition as address
 } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/address';
 import {
-  AccessControlServiceDefinition as acs
+  AccessControlServiceDefinition as access_control
 } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/access_control';
 import {
   GraphServiceDefinition as graph
@@ -28,7 +28,7 @@ import {
   FilterOp, Filter_Operation, Filter_ValueType
 } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/resource_base';
 
-const ServiceDefinitions: any = [country, organization, contact_point, location, address, acs, graph, role];
+const ServiceDefinitions: any = [country, organization, contact_point, location, address, access_control, graph, role];
 
 export class ResourceProvider {
   resourceClients: Map<string, any>;
@@ -44,11 +44,15 @@ export class ResourceProvider {
   async setup(): Promise<void> {
     this.logger.info('Setting up gRPC resource clients');
     for (let resourceName in this.clientCfg) {
-      const resourceServiceDefinition = ServiceDefinitions.filter((obj) => obj.fullName.split('.')[2] === resourceName);
-      const channel = createChannel(this.clientCfg[resourceName].address);
-      const client = createClient({ ...this.clientCfg[resourceName] }, resourceServiceDefinition[0], channel);
-      this.resourceClients.set(resourceName, client);
-      this.logger.verbose('Created client for resource', { resourceName });
+      try {
+        const resourceServiceDefinition = ServiceDefinitions.filter((obj) => obj.fullName.split('.')[2] === resourceName);
+        const channel = createChannel(this.clientCfg[resourceName].address);
+        const client = createClient({ ...this.clientCfg[resourceName] }, resourceServiceDefinition[0], channel);
+        this.resourceClients.set(resourceName, client);
+        this.logger.verbose('Created client for resource', { resourceName });
+      } catch (error) {
+        this.logger.error(`Error creating client instance for resource ${resourceName}`, { code: error.code, message: error.message, stack: error.stack });
+      }
     }
   }
 

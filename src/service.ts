@@ -1,16 +1,15 @@
 import * as _ from 'lodash';
-import * as bodybuilder from 'bodybuilder';
 import * as elasticsearch from '@elastic/elasticsearch';
 import * as jsonfile from 'jsonfile';
 import * as traverse from 'traverse';
-import {errors} from '@restorecommerce/chassis-srv';
-import {ResourceProvider} from './resourceProvider';
+import { errors } from '@restorecommerce/chassis-srv';
+import { ResourceProvider } from './resourceProvider';
 import {
   createActionTarget, createResourceTarget, getSubTreeOrgs
 } from './utils';
-const Long = require('long');
-import {Logger} from 'winston';
+import { Logger } from 'winston';
 import { SearchRequest, DeepPartial, SearchResponse } from '@restorecommerce/rc-grpc-clients/dist/generated-server/io/restorecommerce/search';
+const bodybuilder = require('bodybuilder');
 
 export class InvalidResourceError extends Error {
 }
@@ -74,7 +73,7 @@ export class IndexingService {
       });
       result = searchResponse.body;
     } catch (err) {
-      this.logger.info('Error occured querying ES:', {error: err});
+      this.logger.info('Error occured querying ES:', { error: err });
       throw (err);
     }
     if (_.isEmpty(result.hits) || result.hits.total.value == 0) {
@@ -91,7 +90,7 @@ export class IndexingService {
         return {
           type_url: 'io.restorecommerce.search',
           value: Buffer.from(
-            JSON.stringify(Object.assign({id: hit._id}, hit._source)))
+            JSON.stringify(Object.assign({ id: hit._id }, hit._source)))
         } as DeepPartial<SearchResponse>;
       })
     };
@@ -102,7 +101,7 @@ export class IndexingService {
     const searchLimit = this.cfg.get('elasticsearch:searchLimit');
     if (acl && acl.length > 0) {
       return bodybuilder().size(searchLimit)
-        .query('nested', {path: 'meta'}, q => {
+        .query('nested', { path: 'meta' }, q => {
           for (let value of acl) {
             q = q.orQuery('term', 'meta.acl', value);
           }
@@ -150,7 +149,7 @@ export class IndexingService {
     } catch (err) {
       this.logger.error(
         `Resource ${resourceName} could not be indexed due to error:`,
-        {error: err.message});
+        { error: err.message });
       return;
     }
 
@@ -162,7 +161,7 @@ export class IndexingService {
       }
       if (!_.isEmpty(policySet.error)) {
         this.logger.error(`Resource ${resourceName} could not be indexed due to
-        error retreiving polices:`, {error: policySet.error});
+        error retreiving polices:`, { error: policySet.error });
         return;
       }
     }
@@ -250,13 +249,13 @@ export class IndexingService {
     for (let key of keys) {
       if (key === nestedLongHandler.root) {
         const longObj = body[key];
-        if (Long.isLong(longObj[nestedLongHandler.key])) {
+        if (longObj[nestedLongHandler.key] > Number.MAX_SAFE_INTEGER) {
           longObj[nestedLongHandler.key] =
             (longObj[nestedLongHandler.key] as Long).toNumber();
         }
       }
-      if (Long.isLong(body[key])) {
-        body[key] = (body[key] as Long).toNumber();
+      if (body[key] > Number.MAX_SAFE_INTEGER) {
+        body[key] = (body[key]).toNumber();
       }
     }
 
@@ -272,7 +271,7 @@ export class IndexingService {
       try {
         result = await this.client.index(data);
       } catch (err) {
-        this.logger.error('Error while indexing ES data', {error: err});
+        this.logger.error('Error while indexing ES data', { error: err });
       }
     } else if (eventName == 'modify') {
       // partiallty update the document
@@ -285,7 +284,7 @@ export class IndexingService {
         };
         result = await this.client.update(data);
       } catch (err) {
-        this.logger.error('Error while updating indexed ES data', {error: err});
+        this.logger.error('Error while updating indexed ES data', { error: err });
       }
     }
 
@@ -309,7 +308,7 @@ export class IndexingService {
   async ensureMapping(index: string): Promise<void> {
     let exists = false;
     try {
-      exists = await this.client.indices.exists({index});
+      exists = await this.client.indices.exists({ index });
     } catch (error) {
       if (error.status !== 404) {
         throw error;
@@ -420,7 +419,7 @@ export class IndexingService {
     return jsonfile.readFileSync(`${this.mappingsDir}/${index}.json`);
   }
 
-  convertMapping(index: string, mapping: any,): MappingSettings {
+  convertMapping(index: string, mapping: any, ): MappingSettings {
     return {
       geoPoints: this.getType(index, mapping, 'geo_point'),
       completions: this.getType(index, mapping, 'completion'),
@@ -635,7 +634,7 @@ export class IndexingService {
       await this.client.deleteByQuery({
         index,
         body: {
-          query: {match_all: {}}
+          query: { match_all: {} }
         }
       });
     }

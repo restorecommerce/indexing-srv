@@ -18,8 +18,7 @@
     }
   },
   "redis": {
-    "host": "localhost",
-    "port": 6379,
+    "url": "redis://localhost:6379",
     "offsetStoreInterval": 1000,
     "db-indexes": {
       "db-offsetStore": 0,
@@ -101,31 +100,8 @@
     ]
   },
   "client": {
-    "services": {
-      "indexing-srv": {
-        "transports": {
-          "grpc": {
-            "service": "io.restorecommerce.search.Service",
-            "timeout": 3000,
-            "protos": [
-              "io/restorecommerce/search.proto"
-            ],
-            "protoRoot": "node_modules/@restorecommerce/protos/"
-          }
-        },
-        "loadbalancer": {
-          "name": "roundRobin"
-        },
-        "publisher": {
-          "name": "static",
-          "instances": [
-            "grpc://localhost:50064"
-          ]
-        },
-        "endpoints": {
-          "search": {}
-        }
-      }
+    "indexing-srv": {
+      "address": "localhost:50064"
     }
   },
   "events": {
@@ -133,62 +109,35 @@
       "provider": "kafka",
       "groupId": "indexing-srv",
       "clientId": "indexing-srv",
-      "kafkaHost": "localhost:29092",
+      "kafka": {
+        "clientId": "restore-indexing-srv",
+        "brokers": [
+          "localhost:29092"
+        ]
+      },
       "latestOffset": true,
       "healthCheckCommand": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
       },
       "healthCheckResponse": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
       },
       "versionCommand": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
       },
       "versionResponse": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
       },
       "restoreCommand": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
       },
       "restoreResponse": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
       },
       "resetCommand": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandRequest"
       },
       "resetResponse": {
-        "protos": [
-          "io/restorecommerce/commandinterface.proto"
-        ],
-        "protoRoot": "node_modules/@restorecommerce/protos/",
         "messageObject": "io.restorecommerce.commandinterface.CommandResponse"
       },
       "topics": {

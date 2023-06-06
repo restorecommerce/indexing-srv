@@ -95,8 +95,7 @@
     "key": "role_associations"
   },
   "redis": {
-    "host": "localhost",
-    "port": 6379,
+    "url": "redis://localhost:6379",
     "offsetStoreInterval": 1000,
     "db-indexes": {
       "db-offsetStore": 0,
@@ -189,7 +188,7 @@
     "address": {
       "address": "localhost:50053"
     },
-    "acs": {
+    "access_control": {
       "address": "localhost:50061"
     },
     "graph": {
