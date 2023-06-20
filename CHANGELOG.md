@@ -1,3 +1,9 @@
+# 1.0.0 (June 20th, 2023)
+
+- fix client server typings, redis config and client instance.
+- up tsconfig and fixed typings, fixed unit tests
+- updated all dependencies
+
 # 0.0.17 (March 22nd, 2021)
 
 - updated dependencies

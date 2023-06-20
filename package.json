@@ -1,6 +1,6 @@
 {
   "name": "indexing-srv",
-  "version": "0.0.17",
+  "version": "1.0.0",
   "description": "Restore Commerce Elasticsearch indexing microservice",
   "main": "./lib/start.js",
   "author": "n-fuse GmbH",
