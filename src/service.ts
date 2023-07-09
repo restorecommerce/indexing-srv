@@ -185,8 +185,8 @@ export class IndexingService {
         const rules = policy.rules;
         // get Rule's target->subject roleID (only if it contains a role scoping Entity)
         for (let rule of rules) {
-          if (rule.target && rule.target.subject) {
-            const ruleSub = rule.target.subject;
+          if (rule?.target?.subjects) {
+            const ruleSub = rule.target.subjects;
             let foundRole = false;
             let roleID;
             for (let subAttribute of ruleSub) {
@@ -207,33 +207,33 @@ export class IndexingService {
       }
     }
 
-    if (resourceData.meta && resourceData.meta.owner) {
-      let foundOrg = false;
-      for (let owner of resourceData.meta.owner) {
-        if (owner.id === urnsCfg.ownerEntity
-          && owner.value === urnsCfg.ownerOrg) {
-          foundOrg = true;
+    if (resourceData?.meta?.owners?.length > 0) {
+      for (let attributes of resourceData.meta.owners) {
+        if (attributes.id === urnsCfg.ownerEntity
+          && attributes.value === urnsCfg.ownerOrg && attributes.attributes.length > 0) {
+          for (let attributeObj of attributes.attributes) {
+            if (attributeObj.id === urnsCfg.ownerInstance) {
+              orgIds.add(attributeObj.value);
+            }
+          }
         }
-        if (foundOrg && (owner.id == urnsCfg.ownerInstance)) {
-          orgIds.add(owner.value);
-          foundOrg = false;
-        }
+
       }
     }
 
     let completeOrgHierarchy = new Set<String>();
-    for (let orgID of orgIds) {
+    for (let orgID of Array.from(orgIds)) {
       const orgList = await getSubTreeOrgs(orgID, 'outbound',
         this.resourceProvider.resourceClients.get('graph-srv'), this.cfg,
         this.logger);
       completeOrgHierarchy =
-        new Set<String>([...completeOrgHierarchy, ...orgList]);
+        new Set<String>([...Array.from(completeOrgHierarchy), ...Array.from(orgList)]);
     }
 
     let aclList = [];
     if (roleIDs.size > 0 && completeOrgHierarchy.size > 0) {
-      for (let roleID of roleIDs) {
-        for (let orgID of completeOrgHierarchy) {
+      for (let roleID of Array.from(roleIDs)) {
+        for (let orgID of Array.from(completeOrgHierarchy)) {
           aclList.push(`${roleID}@${orgID}`);
         }
       }
@@ -342,7 +342,7 @@ export class IndexingService {
           type: 'keyword',
           index: false,
         },
-        owner: {
+        owners: {
           type: 'nested',
           properties: {
             id: {
@@ -376,7 +376,7 @@ export class IndexingService {
       [];
     // common config for all resources
     const nestedMetaCfg = {
-      root: 'meta.owner',
+      root: 'meta.owners',
       objectKeys: ['id', 'value']
     };
     nestedArrayHandlersCfg = nestedArrayHandlersCfg.concat(nestedMetaCfg);
@@ -521,17 +521,16 @@ export class IndexingService {
         this.customIndex(document, filtered, customIndexCfg.key);
       }
       // handle nested array doc fields
-      if (nestedArrayHandlers.length > 0) { // path here is meta.owner.id
+      if (nestedArrayHandlers.length > 0) { // path here is meta.owners.id
         for (let eachNestedArray of nestedArrayHandlers) {
           if (_.includes(eachNestedArray.fullPath, path)) {
             // Iterate through doc and set the value
             const objKeys = path.split('.');
             const matchingKey = objKeys[objKeys.length - 1];
-
             let nestedArrayDoc = _.cloneDeep(document);
             const absPath = eachNestedArray.root.split('.');
             for (let eachPath of absPath) {
-              // complete owner object
+              // complete owners object
               nestedArrayDoc = nestedArrayDoc[eachPath];
             }
 
@@ -539,7 +538,7 @@ export class IndexingService {
               if (doc[matchingKey]) {
                 let newPath = path;
                 for (let i = path.length - 1; i >= 0; i--) {
-                  // to get only meta.owner as new path
+                  // to get only meta.owner sas new path
                   newPath = newPath.substr(0, newPath.length - 1);
                   if (path[i] == '.') {
                     break;

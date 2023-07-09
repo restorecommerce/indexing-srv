@@ -125,7 +125,7 @@ export class Worker {
     const resourcesCfg = cfg.get('resources'); // list of index/resource names
 
     for (let resourceType in resourcesCfg) {
-      const { protoPathPrefix, serviceNamePrefix, protoRoot, resources } = resourcesCfg[resourceType];
+      const { serviceNamePrefix, resources } = resourcesCfg[resourceType];
       for (let resourceName of resources) {
         const topicCfg = {
           topic: `${serviceNamePrefix}${resourceName}s.resource`,
@@ -143,23 +143,14 @@ export class Worker {
         kafkaCfg.topics[`${resourceName}s.resource`] = topicCfg;
 
         const compResourceName = formatResourceType(resourceName);
-        const protos = `${protoPathPrefix}${resourceName}.proto`;
         const messageObject = `${serviceNamePrefix}${compResourceName}`;
 
         ['Created', 'Modified'].forEach((label) => {
           kafkaCfg[`${resourceName}${label}`] = {
-            protos: [
-              protos
-            ],
-            protoRoot,
             messageObject
           };
         });
         kafkaCfg[`${resourceName}Deleted`] = {
-          protos: [
-            `${protoPathPrefix}${resourceName}.proto`
-          ],
-          protoRoot,
           messageObject: `${serviceNamePrefix}${resourceName}.Deleted`
         };
       }

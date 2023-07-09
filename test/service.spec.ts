@@ -274,9 +274,10 @@ function createMetadata(orgID: string): any {
     created: now,
     modified: now,
     modified_by: 'AdminID',
-    owner: [{
+    owners: [{
       id: 'test',
-      value: 'test'
+      value: 'test',
+      attributes: []
     }],
     acl: []
   };
@@ -287,7 +288,7 @@ function updateMetadata(obj: any): any {
     created: obj.meta.created,
     modified: Date.now(),
     modified_by: 'AdminID',
-    owner: obj.meta.owner,
+    owners: obj.meta.owners,
     acl: []
   };
 }
