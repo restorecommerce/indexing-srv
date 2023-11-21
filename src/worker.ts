@@ -37,7 +37,12 @@ export class Worker {
     cfg = this.setUpResourcesConfig(cfg);
     this.cfg = cfg;
 
-    logger = logger || createLogger(cfg.get('logger'));
+    const loggerCfg = cfg.get('logger');
+    loggerCfg.esTransformer = (msg) => {
+      msg.fields = JSON.stringify(msg.fields);
+      return msg;
+    };
+    logger = logger || createLogger(loggerCfg);
     this.logger = logger;
 
     const kafkaCfg = cfg.get('events:kafka');

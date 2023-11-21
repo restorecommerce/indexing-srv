@@ -250,7 +250,7 @@ export class IndexingService {
         const longObj = body[key];
         if (longObj[nestedLongHandler.key] > Number.MAX_SAFE_INTEGER) {
           longObj[nestedLongHandler.key] =
-            (longObj[nestedLongHandler.key] as Long).toNumber();
+            (longObj[nestedLongHandler.key] as any).toNumber();
         }
       }
       if (body[key] > Number.MAX_SAFE_INTEGER) {

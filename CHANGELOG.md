@@ -1,3 +1,7 @@
+# 1.0.1 (November 21st, 2023)
+
+- up deps
+
 # 1.0.0 (June 20th, 2023)
 
 - fix client server typings, redis config and client instance.

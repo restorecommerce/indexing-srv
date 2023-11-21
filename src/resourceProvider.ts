@@ -47,7 +47,7 @@ export class ResourceProvider {
       try {
         const resourceServiceDefinition = ServiceDefinitions.filter((obj) => obj.fullName.split('.')[2] === resourceName);
         const channel = createChannel(this.clientCfg[resourceName].address);
-        const client = createClient({ ...this.clientCfg[resourceName] }, resourceServiceDefinition[0], channel);
+        const client = createClient({ ...this.clientCfg[resourceName], logger: this.logger }, resourceServiceDefinition[0], channel);
         this.resourceClients.set(resourceName, client);
         this.logger.verbose('Created client for resource', { resourceName });
       } catch (error) {
