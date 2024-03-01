@@ -69,6 +69,6 @@
     "test-debug": "npm run mocha -- --inspect-brk"
   },
   "engines": {
-    "node": ">= 18.0.0"
+    "node": ">= 20.8.0"
   }
 }
