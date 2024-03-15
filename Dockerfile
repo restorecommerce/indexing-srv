@@ -1,5 +1,5 @@
 ### Base
-FROM node:20.8.0-alpine3.18 as base
+FROM node:20.11.1-alpine3.19 as base
 ENV NO_UPDATE_NOTIFIER=true
 
 USER node
