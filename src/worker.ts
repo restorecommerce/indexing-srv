@@ -38,10 +38,6 @@ export class Worker {
     this.cfg = cfg;
 
     const loggerCfg = cfg.get('logger');
-    loggerCfg.esTransformer = (msg) => {
-      msg.fields = JSON.stringify(msg.fields);
-      return msg;
-    };
     logger = logger || createLogger(loggerCfg);
     this.logger = logger;
 
